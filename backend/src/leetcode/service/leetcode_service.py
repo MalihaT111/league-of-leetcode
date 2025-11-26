@@ -232,3 +232,9 @@ class LeetCodeService:
         error_msg = "You've completed all questions under your current filters. Enable Repeat Questions or widen your topics."
         print(f"⚠️ {error_msg}")
         return {"error": error_msg}
+    
+    @staticmethod
+    async def get_submission_details(submission_id: int, auth_cookies: str) -> dict:
+        """Fetch details of a specific submission by its ID."""
+        data = await LeetCodeGraphQLClient.query(SUBMISSION_DETAILS, {"submissionId": submission_id}, auth_cookies)
+        return data["data"]["submissionDetails"]
