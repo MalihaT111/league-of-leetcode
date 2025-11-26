@@ -64,7 +64,8 @@ export function useTopicValidation(
   const [mapLoadFailed, setMapLoadFailed] = useState(false);
 
   // Normalize topic names for matching (remove spaces, lowercase, trim)
-  const normalize = (name: string): string => {
+  const normalize = (name?: string): string => {
+    if (!name) return "";
     return name.toLowerCase().replace(/\s+/g, "").replace(/-/g, "").trim();
   };
 
