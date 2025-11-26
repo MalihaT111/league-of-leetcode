@@ -81,3 +81,23 @@ query problemsetQuestionListV2 {
   }
 }
 """
+
+SUBMISSION_DETAILS = """
+query submissionDetails($submissionId: Int!) {
+  submissionDetails(submissionId: $submissionId) {
+    runtime
+    runtimeDisplay
+    runtimePercentile
+    runtimeDistribution
+    memory
+    memoryDisplay
+    memoryPercentile
+    code
+    timestamp
+    lang {
+      name
+      verboseName
+    }
+  }
+}
+"""
