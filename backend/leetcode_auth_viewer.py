@@ -2,7 +2,7 @@ import os
 import asyncio
 import logging
 from playwright.async_api import async_playwright
-from src.leetcode.service.client import LeetCodeGraphQLClient
+from src.leetcode.service.leetcode_service import LeetCodeService
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -124,20 +124,26 @@ async def get_auth_cookie():
         return session_token, csrf_token
 
 
-if __name__ == "__main__":
-    try:
-        session_token, csrf_token = asyncio.run(get_auth_cookie())
-        print("\n" + "="*60)
-        print("Authentication successful!")
-        print("="*60)
-        print(f"LEETCODE_SESSION = {session_token}")
-        print(f"csrftoken = {csrf_token}")
-        print("="*60)
-        
-        
 
-    except Exception as e:
-        print("\n" + "="*60)
-        print("Authentication failed!")
-        print(e)
+async def main():
+    session_token, csrf_token = await get_auth_cookie()
+    print("\n" + "="*60)
+    print("✅ Authentication successful!")
+    print("="*60)
+    print(f"LEETCODE_SESSION = {session_token}")
+    print(f"csrftoken = {csrf_token}")
+    print("="*60)
+    print("\nYou can now use these tokens for authenticated LeetCode API requests.")
+    
+    # Example: Test getting submission details
+    print("\nTesting API call...")
+    submission_id = 1831890835
+    question = await LeetCodeService.get_submission_details(submission_id, f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}")
+    print(f"\n✅ Submission details retrieved:")
+    print(f"   Submission ID: {submission_id}")
+    print(f"   Data keys: {list(question.keys())}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
