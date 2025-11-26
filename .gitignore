@@ -3,3 +3,6 @@
 .vscode/
 .idea/
 .env
+
+# LeetCode tokens (sensitive)
+backend/auth_tokens/leetcode_tokens.json

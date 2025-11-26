@@ -1,17 +1,48 @@
 from fastapi import HTTPException
 import httpx
+import json
+import os
 from typing import List, Optional
 from src.leetcode.service.client import LeetCodeGraphQLClient
 from src.leetcode.schemas import Problem, UserSubmission, ProblemStats, SyncResult
 from src.leetcode.enums.difficulty import DifficultyEnum
 from src.leetcode.service.graphql_queries import *
-import json
 from collections import defaultdict
-import os 
 
 CACHE_FILE = "topic_map_cache.json"
 ALL_DIFFS = {"EASY", "MEDIUM", "HARD"}
 TOPIC_MAP_CACHE = None
+TOKENS_FILE = "backend/auth_tokens/leetcode_tokens.json"
+
+
+def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
+    """
+    Load LeetCode authentication cookies from the saved tokens file.
+    Returns formatted cookie string: "csrftoken=<token>; LEETCODE_SESSION=<session>"
+    """
+    try:
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(
+                f"Tokens file not found: {filepath}. "
+                "Run 'python backend/leetcode_auth_viewer.py' to authenticate."
+            )
+        
+        with open(filepath, 'r') as f:
+            tokens_data = json.load(f)
+        
+        csrf_token = tokens_data.get('csrftoken', '')
+        session_token = tokens_data.get('LEETCODE_SESSION', '')
+        
+        if not session_token:
+            raise ValueError("LEETCODE_SESSION token not found in tokens file")
+        
+        return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to load authentication tokens: {str(e)}"
+        )
 
 class LeetCodeService:
     @staticmethod
@@ -234,7 +265,18 @@ class LeetCodeService:
         return {"error": error_msg}
     
     @staticmethod
-    async def get_submission_details(submission_id: int, auth_cookies: str) -> dict:
-        """Fetch details of a specific submission by its ID."""
-        data = await LeetCodeGraphQLClient.query(SUBMISSION_DETAILS, {"submissionId": submission_id}, auth_cookies)
+    async def get_submission_details(submission_id: int) -> dict:
+        """
+        Fetch details of a specific submission by its ID.
+        Automatically loads authentication cookies from the saved tokens file.
+        """
+        # Load authentication cookies from file
+        auth_cookies = load_auth_cookies()
+        
+        # Query with authentication
+        data = await LeetCodeGraphQLClient.query(
+            SUBMISSION_DETAILS, 
+            {"submissionId": submission_id}, 
+            auth_cookies
+        )
         return data["data"]["submissionDetails"]
