@@ -25,8 +25,8 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     leetcode_username = Column(String(50), nullable=True)  # Based on your schema
     user_elo = Column(Integer, default=1200)
     repeating_questions = Column(Boolean, default=False, nullable=False)
-    difficulty = Column(MutableList.as_mutable(JSON), default=lambda: ["1", "2", "3"], nullable=False)
-    topics = Column(MutableList.as_mutable(JSON), default=lambda: [str(i) for i in range(0, 74)], nullable=False)
+    difficulty = Column(MutableList.as_mutable(JSON), default=lambda: [1, 2, 3], nullable=False)
+    topics = Column(MutableList.as_mutable(JSON), default=lambda: [i for i in range(0, 71)], nullable=False)
     winstreak = Column(Integer, default=0, nullable=False)  # Win streak counter
     
     # FastAPI-users required fields (need to be added to your database)
