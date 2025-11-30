@@ -16,7 +16,7 @@ class UserRead(schemas.BaseUser[int]):
     leetcode_hash: Optional[str] = None
     repeating_questions: Optional[bool] = False  # tinyint(1) - boolean
     difficulty: List[str] = ["1", "2", "3"]  # List of difficulty levels
-    topics: List[str] = [str(i) for i in range(1, 74)]  # List of topic IDs
+    topics: List[str] = [i for i in range(0, 71)]  # List of topic IDs
     winstreak: int = 0  # Win streak counter
     
     # Note: email field comes from BaseUser and maps to your username column
@@ -43,13 +43,13 @@ class UserRead(schemas.BaseUser[int]):
         if isinstance(value, str):
             try:
                 parsed = json.loads(value)
-                return parsed if isinstance(parsed, list) else [str(i) for i in range(1, 74)]
+                return parsed if isinstance(parsed, list) else [i for i in range(0, 71)]
             except:
-                return [str(i) for i in range(1, 74)]
+                return [i for i in range(0, 71)]
         elif isinstance(value, list):
             return value
         else:
-            return [str(i) for i in range(1, 74)]
+            return [i for i in range(0, 71)]
 
 class UserCreate(schemas.BaseUserCreate):
     """Schema for creating users - requires your essential fields."""
