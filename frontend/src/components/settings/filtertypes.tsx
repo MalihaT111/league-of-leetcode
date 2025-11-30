@@ -55,7 +55,7 @@ export default function FilterTypesCard({
 
   // 🔎 Filtered list based on search term
   const filtered = topicNames.filter((f) =>
-    f.toLowerCase().includes(search.toLowerCase())
+    f && f.toLowerCase().includes(search.toLowerCase())
   );
 
   // ✅ "Select All" → sets all topics active
