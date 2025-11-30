@@ -11,7 +11,7 @@ class UserBase(BaseModel):
     user_elo: int = 1200
     repeat: bool = False
     difficulty: List[str] = ["1", "2", "3"]
-    topics: List[str] = [str(i) for i in range(1, 74)]
+    topics: List[str] = [i for i in range(0, 71)]
 
 class UserProfile(BaseModel):
     username: str
@@ -23,7 +23,7 @@ class UserSettings(BaseModel):
     username: str
     repeat: bool = False
     difficulty: List[str] = ["1", "2", "3"]
-    topics: List[str] = [str(i) for i in range(1, 74)]  
+    topics: List[str] = [i for i in range(0, 71)]  
     model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(UserBase):
