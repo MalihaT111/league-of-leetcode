@@ -38,7 +38,7 @@ a {
 /* Title gradient used across all pages - matches home page styling */
 .title-gradient {
   font-family: 'Migra', serif !important;
-  font-weight: 600 !important;
+  font-weight: 800 !important;
   letter-spacing: clamp(1px, 0.3vw, 2px) !important;
   line-height: 1.05 !important;
   background: linear-gradient(
