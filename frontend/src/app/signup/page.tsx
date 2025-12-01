@@ -13,10 +13,16 @@ import {
   Alert,
   Box,
 } from "@mantine/core";
+import { Space_Grotesk } from "next/font/google";
 import { AlertCircle, Check, Copy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { montserrat } from "../fonts";
+import styles from "./SignUp.module.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -53,7 +59,6 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setLoading(true);
@@ -65,8 +70,6 @@ export default function SignUpPage() {
         formData.email,
         formData.password
       );
-
-      // Store the verification hash and show verification form
       setVerificationHash(response.leetcode_hash);
       setShowVerification(true);
     } catch (err: any) {
@@ -78,7 +81,6 @@ export default function SignUpPage() {
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formData.leetcodeUsername.trim()) {
       setError("Please enter your LeetCode username");
       return;
@@ -93,11 +95,8 @@ export default function SignUpPage() {
         email: formData.email,
         leetcode_username: formData.leetcodeUsername,
       });
-
       setRegistrationComplete(true);
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2000);
+      setTimeout(() => router.push("/signin"), 2000);
     } catch (err: any) {
       setError(err.message || "Failed to verify LeetCode username");
     } finally {
@@ -113,40 +112,16 @@ export default function SignUpPage() {
     }
   };
 
-  // Registration complete screen
   if (registrationComplete) {
     return (
-      <Flex
-        h="100vh"
-        w="100%"
-        justify="center"
-        align="center"
-        p="xl"
-        bg="#1a1a1a"
-      >
-        <Card
-          shadow="xl"
-          radius="md"
-          p="xl"
-          w={450}
-          bg="gray.9"
-          style={{ border: "1px solid #333" }}
-        >
+      <Flex className={`${styles.page} ${spaceGrotesk.className}`}>
+        <Card radius="lg" p="xl" className={styles.card}>
           <Stack gap="lg" ta="center">
-            <Check size={64} color="#4CAF50" />
-            <Title
-              order={2}
-              c="white"
-              className={montserrat.className}
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                fontStyle: "italic",
-              }}
-            >
+            <Check size={64} color="#9dffbd" />
+            <Title order={2} className={`title-gradient ${styles.title}`}>
               REGISTRATION COMPLETE!
             </Title>
-            <Text c="gray.4">
+            <Text c="rgba(220, 220, 255, 0.6)">
               Your account has been created successfully. Redirecting to sign in...
             </Text>
           </Stack>
@@ -155,56 +130,21 @@ export default function SignUpPage() {
     );
   }
 
-  // Verification step - show hash and collect LeetCode username
   if (showVerification && verificationHash) {
     return (
-      <Flex
-        h="100vh"
-        w="100%"
-        justify="center"
-        align="center"
-        p="xl"
-        bg="#1a1a1a"
-      >
-        <Card
-          shadow="xl"
-          radius="md"
-          p="xl"
-          w={550}
-          bg="gray.9"
-          style={{ border: "1px solid #333" }}
-        >
+      <Flex className={`${styles.page} ${spaceGrotesk.className}`}>
+        <Card radius="lg" p="xl" className={styles.cardWide}>
           <Stack gap="lg">
-            {/* Title */}
             <Box ta="center">
-              <Title
-                order={1}
-                c="white"
-                className={montserrat.className}
-                style={{
-                  fontSize: "32px",
-                  fontWeight: 700,
-                  fontStyle: "italic",
-                  letterSpacing: 1,
-                  marginBottom: "8px",
-                }}
-              >
+              <Title order={1} className={`title-gradient ${styles.title}`}>
                 VERIFY LEETCODE
               </Title>
-              <Text c="gray.4" size="sm">
+              <Text c="rgba(220, 220, 255, 0.6)" size="sm" mt="xs">
                 Link your LeetCode account to complete registration
               </Text>
             </Box>
 
-            {/* Verification Hash Display */}
-            <Box
-              p="md"
-              bg="#2d2d2d"
-              style={{
-                border: "2px solid #FFBD42",
-                borderRadius: "8px",
-              }}
-            >
+            <Box className={styles.hashBox}>
               <Flex justify="space-between" align="center" mb="sm">
                 <Text c="white" fw={600}>
                   Your Verification Hash:
@@ -212,38 +152,18 @@ export default function SignUpPage() {
                 <Button
                   size="xs"
                   variant="subtle"
-                  color="yellow"
+                  className={styles.copyButton}
                   leftSection={<Copy size={14} />}
                   onClick={copyToClipboard}
                 >
                   {copied ? "Copied!" : "Copy"}
                 </Button>
               </Flex>
-              <Text
-                c="#FFBD42"
-                fw={700}
-                size="sm"
-                style={{
-                  wordBreak: "break-all",
-                  fontFamily: "monospace",
-                }}
-              >
-                {verificationHash}
-              </Text>
+              <Text className={styles.hashText}>{verificationHash}</Text>
             </Box>
 
-            {/* Instructions */}
-            <Alert
-              color="yellow"
-              variant="light"
-              styles={{
-                root: {
-                  backgroundColor: "rgba(255, 189, 66, 0.1)",
-                  border: "1px solid #FFBD42",
-                },
-              }}
-            >
-              <Text c="white" size="sm" ta="left">
+            <Alert color="violet" variant="light" className={styles.instructionAlert}>
+              <Text c="rgba(220, 220, 255, 0.9)" size="sm" ta="left">
                 <strong>Instructions:</strong>
                 <br />
                 1. Copy the verification hash above
@@ -254,43 +174,21 @@ export default function SignUpPage() {
               </Text>
             </Alert>
 
-            {/* Error Alert */}
             {error && (
-              <Alert
-                icon={<AlertCircle size={16} />}
-                color="red"
-                variant="filled"
-              >
+              <Alert icon={<AlertCircle size={16} />} color="red" variant="light" className={styles.alert}>
                 {error}
               </Alert>
             )}
 
-            {/* Verification Form */}
             <form onSubmit={handleVerification}>
               <Stack gap="md">
                 <TextInput
                   label="LeetCode Username"
                   placeholder="Enter your LeetCode username"
                   value={formData.leetcodeUsername}
-                  onChange={(e) =>
-                    handleInputChange("leetcodeUsername", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("leetcodeUsername", e.target.value)}
                   required
-                  styles={{
-                    label: {
-                      color: "white",
-                      fontWeight: 600,
-                      marginBottom: "8px",
-                    },
-                    input: {
-                      backgroundColor: "#2d2d2d",
-                      border: "1px solid #444",
-                      color: "white",
-                      "&:focus": {
-                        borderColor: "#d8a727",
-                      },
-                    },
-                  }}
+                  classNames={{ label: styles.inputLabel, input: styles.input }}
                 />
 
                 <Button
@@ -299,21 +197,7 @@ export default function SignUpPage() {
                   fullWidth
                   size="lg"
                   mt="md"
-                  styles={{
-                    root: {
-                      backgroundColor: "#FFBD42",
-                      color: "black",
-                      fontWeight: 700,
-                      fontSize: "16px",
-                      textTransform: "uppercase",
-                      letterSpacing: 0.5,
-                      fontStyle: "italic",
-                      border: "none",
-                      "&:hover": {
-                        backgroundColor: "#d8a727",
-                      },
-                    },
-                  }}
+                  className={styles.submitButton}
                 >
                   {verifyLoading ? "Verifying..." : "Complete Registration"}
                 </Button>
@@ -326,58 +210,24 @@ export default function SignUpPage() {
   }
 
   return (
-    <Flex
-      h="100vh"
-      w="100%"
-      justify="center"
-      align="center"
-      p="xl"
-      bg="#1a1a1a"
-    >
-      <Card
-        shadow="xl"
-        radius="md"
-        p="xl"
-        w={450}
-        bg="gray.9"
-        style={{
-          border: "1px solid #333",
-        }}
-      >
+    <Flex className={`${styles.page} ${spaceGrotesk.className}`}>
+      <Card radius="lg" p="xl" className={styles.card}>
         <Stack gap="lg">
-          {/* Title */}
           <Box ta="center">
-            <Title
-              order={1}
-              c="white"
-              className={montserrat.className}
-              style={{
-                fontSize: "32px",
-                fontWeight: 700,
-                fontStyle: "italic",
-                letterSpacing: 1,
-                marginBottom: "8px",
-              }}
-            >
+            <Title order={1} className={`title-gradient ${styles.title}`}>
               SIGN UP
             </Title>
-            <Text c="gray.4" size="sm">
+            <Text c="rgba(220, 220, 255, 0.6)" size="sm" mt="xs">
               Join the League of LeetCode
             </Text>
           </Box>
 
-          {/* Error Alert */}
           {error && (
-            <Alert
-              icon={<AlertCircle size={16} />}
-              color="red"
-              variant="filled"
-            >
+            <Alert icon={<AlertCircle size={16} />} color="red" variant="light" className={styles.alert}>
               {error}
             </Alert>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit}>
             <Stack gap="md">
               <TextInput
@@ -387,21 +237,7 @@ export default function SignUpPage() {
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 required
                 type="email"
-                styles={{
-                  label: {
-                    color: "white",
-                    fontWeight: 600,
-                    marginBottom: "8px",
-                  },
-                  input: {
-                    backgroundColor: "#2d2d2d",
-                    border: "1px solid #444",
-                    color: "white",
-                    "&:focus": {
-                      borderColor: "#d8a727",
-                    },
-                  },
-                }}
+                classNames={{ label: styles.inputLabel, input: styles.input }}
               />
 
               <PasswordInput
@@ -410,52 +246,16 @@ export default function SignUpPage() {
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 required
-                styles={{
-                  label: {
-                    color: "white",
-                    fontWeight: 600,
-                    marginBottom: "8px",
-                  },
-                  input: {
-                    backgroundColor: "#2d2d2d",
-                    border: "1px solid #444",
-                    color: "white",
-                    "&:focus": {
-                      borderColor: "#d8a727",
-                    },
-                  },
-                  innerInput: {
-                    backgroundColor: "transparent",
-                  },
-                }}
+                classNames={{ label: styles.inputLabel, input: styles.input, innerInput: styles.innerInput }}
               />
 
               <PasswordInput
                 label="Confirm Password"
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
-                onChange={(e) =>
-                  handleInputChange("confirmPassword", e.target.value)
-                }
+                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                 required
-                styles={{
-                  label: {
-                    color: "white",
-                    fontWeight: 600,
-                    marginBottom: "8px",
-                  },
-                  input: {
-                    backgroundColor: "#2d2d2d",
-                    border: "1px solid #444",
-                    color: "white",
-                    "&:focus": {
-                      borderColor: "#d8a727",
-                    },
-                  },
-                  innerInput: {
-                    backgroundColor: "transparent",
-                  },
-                }}
+                classNames={{ label: styles.inputLabel, input: styles.input, innerInput: styles.innerInput }}
               />
 
               <Button
@@ -464,39 +264,17 @@ export default function SignUpPage() {
                 fullWidth
                 size="lg"
                 mt="md"
-                styles={{
-                  root: {
-                    backgroundColor: "#FFBD42",
-                    color: "black",
-                    fontWeight: 700,
-                    fontSize: "16px",
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    fontStyle: "italic",
-                    border: "none",
-                    "&:hover": {
-                      backgroundColor: "#d8a727",
-                    },
-                  },
-                }}
+                className={styles.submitButton}
               >
                 {loading ? "Creating Account..." : "Sign Up"}
               </Button>
             </Stack>
           </form>
 
-          {/* Sign In Link */}
-          <Box ta="center" mt="md">
-            <Text c="gray.4" size="sm">
+          <Box ta="center" mt="sm">
+            <Text c="rgba(220, 220, 255, 0.6)" size="sm">
               Already have an account?{" "}
-              <Link
-                href="/signin"
-                style={{
-                  color: "#d8a727",
-                  textDecoration: "none",
-                  fontWeight: 600,
-                }}
-              >
+              <Link href="/signin" className={styles.link}>
                 Sign in here
               </Link>
             </Text>
