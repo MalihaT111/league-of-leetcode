@@ -13,7 +13,7 @@
 
 /* BASE NAV ITEMS */
 .navItem {
-  color: rgba(220, 220, 255, 0.65);
+  color: rgba(220, 220, 255, 0.85);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -21,6 +21,7 @@
   position: relative;
   text-decoration: none;
   transition: color 0.25s ease, transform 0.25s ease;
+  cursor: pointer;
 
   /* Orbit drift animation */
   animation: orbitFloat 6s ease-in-out infinite;
