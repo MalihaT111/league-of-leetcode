@@ -1,27 +1,32 @@
 
 /* NAVBAR CONTAINER */
 .navbar {
-  position: absolute;
-  top: 5%;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 50px;
+  align-items: center;
+  gap: clamp(20px, 4vw, 50px);
+  padding: clamp(15px, 3vh, 30px) clamp(10px, 2vw, 20px);
   z-index: 200;
   pointer-events: auto;
+  flex-wrap: wrap;
 }
 
 /* BASE NAV ITEMS */
 .navItem {
   color: rgba(220, 220, 255, 0.85);
-  font-size: 14px;
+  font-size: clamp(11px, 1.2vw, 14px);
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: clamp(1.5px, 0.3vw, 3px);
   font-weight: 500;
   position: relative;
   text-decoration: none;
   transition: color 0.25s ease, transform 0.25s ease;
   cursor: pointer;
+  white-space: nowrap;
 
   /* Orbit drift animation */
   animation: orbitFloat 6s ease-in-out infinite;
@@ -34,8 +39,9 @@
 }
 
 /* Hover glow */
-.navItem:hover {
-  color: #c7b8ff;
+.navItem:hover,
+.navItemLogout:hover {
+  color: #c7b8ff !important;
   transform: translateY(-2px);
 }
 
@@ -44,4 +50,30 @@
   0% { transform: translateY(0px); }
   50% { transform: translateY(-3px); }
   100% { transform: translateY(0px); }
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 768px) {
+  .navbar {
+    gap: clamp(10px, 3vw, 20px);
+    padding: 15px 10px;
+  }
+
+  .navItem {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    gap: 8px;
+    padding: 12px 8px;
+    justify-content: space-evenly;
+  }
+
+  .navItem {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Flex, Title, Tabs, TextInput, Button, Card, Text, Badge, Group, Stack, Avatar } from "@mantine/core";
 // Icons replaced with text for simplicity
 import { montserrat } from "../fonts";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/all/Navbar";
 import { AuthService } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import {
@@ -71,8 +71,8 @@ export default function FriendsPage() {
       
       <Title
         order={1}
-        className={montserrat.className}
-        style={{ fontSize: "40px", fontWeight: 700, marginTop: "80px", marginBottom: "40px" }}
+        className="title-gradient"
+        style={{ fontSize: "3rem", marginTop: "80px", marginBottom: "40px" }}
       >
         FRIENDS
       </Title>

@@ -6,6 +6,7 @@ import "./fonts.css";
 import { Space_Grotesk } from "next/font/google";
 import { montserrat, orbitron, geistSans, geistMono } from "./fonts";
 import ReactQueryProvider from "@/lib/queryProvider";
+import ParticleBackground from "@/components/all/ParticleBackground";
 
 import InitialAppLoader from "./InitialAppLoader";   // ⭐ ADD THIS
 
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             fontFamilyMonospace: "var(--font-geist-mono), monospace",
           }}
         >
+          <ParticleBackground />
           <ReactQueryProvider>
             <InitialAppLoader> 
                           {/* ⭐ WRAP CHILDREN HERE */}

@@ -13,7 +13,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -33,4 +33,22 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+/* Title gradient used across all pages - matches home page styling */
+.title-gradient {
+  font-family: 'Migra', serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  line-height: 1.05 !important;
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #d5c8ff 30%,
+    #b49aff 60%,
+    #8ea0ff 100%
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
 }

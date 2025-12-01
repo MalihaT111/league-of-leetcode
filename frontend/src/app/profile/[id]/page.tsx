@@ -3,7 +3,7 @@ import React from "react";
 import { useProfileQuery } from "@/lib/api/queries/profile";
 import { Flex, Title } from "@mantine/core";
 import { montserrat } from "../../fonts";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/all/Navbar";
 import ProfileStatsCard from "@/components/profile/profilestatscard";
 import RecentSubmissionsTable from "@/components/profile/profilesubmissions";
 import { useParams } from "next/navigation";
@@ -33,8 +33,8 @@ export default function ProfilePage() {
       <Navbar />
       <Title
         order={1}
-        className={montserrat.className}
-        style={{ fontSize: "40px", fontWeight: 700 }}
+        className="title-gradient"
+        style={{ fontSize: "3rem" }}
       >
         PROFILE
       </Title>

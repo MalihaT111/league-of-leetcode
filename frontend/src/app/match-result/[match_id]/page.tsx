@@ -130,8 +130,8 @@ export default function MatchResultPage() {
     >
       <Title
         order={1}
-        className={montserrat.className}
-        style={{ fontSize: "56px", fontWeight: 800, letterSpacing: "2px" }}
+        className="title-gradient"
+        style={{ fontSize: "3.5rem" }}
       >
         RESULTS
       </Title>
