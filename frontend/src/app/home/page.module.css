@@ -15,13 +15,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 80vw;
-  height: 80vh;
+  width: clamp(300px, 85vw, 80vw);
+  height: clamp(400px, 85vh, 80vh);
   transform: translate(-50%, -50%);
   
   border: 1px solid rgba(195, 165, 255, 0.45);
-  border-radius: 20px;
-  padding: 60px;
+  border-radius: clamp(12px, 2vw, 20px);
+  padding: clamp(20px, 5vw, 60px);
   backdrop-filter: blur(4px);
   
   display: flex;
@@ -114,24 +114,22 @@
 .title {
   font-family: 'Migra', serif;
   font-weight: 600;
-  font-size: 4rem;
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-
-background: linear-gradient(
-  90deg,
-  #ffffff 0%,
-  #d5c8ff 30%,
-  #b49aff 60%,
-  #8ea0ff 100%
-);
--webkit-background-clip: text;
-  
-  color: transparent;
-  letter-spacing: 2px; /* calmer, cleaner */
+  font-size: clamp(2rem, 6vw, 4rem);
   line-height: 1.05;
-  margin-top: 40px; /* adjust as needed */
-  margin-left: 80px;
+  letter-spacing: clamp(1px, 0.3vw, 2px);
+
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #d5c8ff 30%,
+    #b49aff 60%,
+    #8ea0ff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-top: clamp(20px, 4vh, 40px);
+  margin-left: clamp(20px, 6vw, 80px);
 }
 
 
@@ -242,9 +240,9 @@ background: linear-gradient(
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 0 20px;
-  letter-spacing: 2px;
-  font-size: 13px;
+  padding: 0 clamp(10px, 2vw, 20px);
+  letter-spacing: clamp(1px, 0.2vw, 2px);
+  font-size: clamp(10px, 1.5vw, 13px);
   color: rgba(220, 220, 255, 0.85);
   font-weight: 500;
 }

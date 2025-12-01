@@ -1,7 +1,8 @@
 import { Box, Stack, Text } from "@mantine/core";
+import styles from "./Profile.module.css";
 
 interface ProfileBoxProps {
-  username?: string; // undefined = unknown player
+  username?: string;
   rating?: number;
 }
 
@@ -10,33 +11,16 @@ export function ProfileBox({ username, rating }: ProfileBoxProps) {
 
   return (
     <Stack align="center" gap="xs">
-      {/* Square box */}
-      <Box
-        style={{
-          width: "150px",
-          height: "150px",
-          backgroundColor: "#D9D9D9",
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "110px",
-          fontStyle: "italic",
-          fontWeight: 700,
-          lineHeight: "1",
-          fontFamily: "var(--font-montserrat), sans-serif",
-        }}
-      >
+      <Box className={styles.profileBox}>
         {isUnknown ? (
           <Text fw={700} fz={40}>
             ?
           </Text>
         ) : (
-          <Text fw={700} fz={32}></Text> // placeholder avatar (initial letter)
+          <Text fw={700} fz={32}></Text>
         )}
       </Box>
 
-      {/* Username + rating */}
       {isUnknown ? (
         <Text c="dimmed">???</Text>
       ) : (

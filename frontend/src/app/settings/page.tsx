@@ -175,7 +175,7 @@ if (settingsHook.loading || !settingsHook.settings) {
       <Title
         order={1}
         className="title-gradient"
-        style={{ fontSize: "3rem" }}
+        style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)" }}
       >
         SETTINGS
       </Title>

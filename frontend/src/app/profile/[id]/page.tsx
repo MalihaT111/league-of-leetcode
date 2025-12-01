@@ -2,48 +2,40 @@
 import React from "react";
 import { useProfileQuery } from "@/lib/api/queries/profile";
 import { Flex, Title } from "@mantine/core";
-import { montserrat } from "../../fonts";
 import Navbar from "@/components/all/Navbar";
-import ProfileStatsCard from "@/components/profile/profilestatscard";
-import RecentSubmissionsTable from "@/components/profile/profilesubmissions";
+import ProfileStatsCard from "@/components/profile/Stats";
+import RecentSubmissionsTable from "@/components/profile/Submissions";
 import { useParams } from "next/navigation";
+import styles from "./Profile.module.css";
 
 export default function ProfilePage() {
   const { id } = useParams();
-  const userId = Number(id); // convert to number
+  const userId = Number(id);
 
   const { data, isLoading, error } = useProfileQuery(userId);
 
   if (isLoading) return null;
   if (error || !data) return <p>Failed to load profile data.</p>;
 
-  // ✅ Destructure to match backend JSON
   const { user, stats, recent_matches } = data;
 
   return (
     <Flex
       direction="column"
       align="center"
-      justify="center"
+      bg="#0d0d0f"
       mih="100vh"
-      bg="#1a1a1a"
       c="white"
-      gap={40}
+      className={styles.page}
     >
       <Navbar />
-      <Title
-        order={1}
-        className="title-gradient"
-        style={{ fontSize: "3rem" }}
-      >
+
+      <Title order={1} className={`title-gradient ${styles.title}`}>
         PROFILE
       </Title>
 
-      <Flex gap={60} align="flex-start" justify="center">
-        {/* ✅ Pass both user and stats separately */}
+      <Flex className={styles.content}>
         <ProfileStatsCard user={user} stats={stats} />
-
-        {/* ✅ Pass matches for the table */}
         <RecentSubmissionsTable matches={recent_matches} />
       </Flex>
     </Flex>

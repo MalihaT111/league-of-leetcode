@@ -72,7 +72,7 @@ export default function FriendsPage() {
       <Title
         order={1}
         className="title-gradient"
-        style={{ fontSize: "3rem", marginTop: "80px", marginBottom: "40px" }}
+        style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", marginTop: "80px", marginBottom: "40px" }}
       >
         FRIENDS
       </Title>

@@ -1,0 +1,141 @@
+/* Box.tsx styles */
+.profileBox {
+  width: 150px;
+  height: 150px;
+  background-color: #D9D9D9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 110px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* Head.tsx styles */
+.headerContainer {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 0 15px rgba(189, 155, 255, 0.15);
+  backdrop-filter: blur(4px);
+  overflow: hidden;
+}
+
+.headerAvatar {
+  background: rgba(189, 155, 255, 0.3);
+  border: 2px solid rgba(189, 155, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.headerUsername {
+  font-size: clamp(12px, 3vw, 16px);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Shared card styles */
+.card {
+  background: rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  box-shadow: 0 0 25px rgba(189, 155, 255, 0.12);
+}
+
+/* Stats.tsx styles */
+.statsCard {
+  composes: card;
+  width: clamp(280px, 90vw, 360px);
+  height: 459px;
+}
+
+.statsTitle {
+  margin-bottom: 16px;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+}
+
+.statRow {
+  padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.statRow:hover {
+  background: rgba(189, 155, 255, 0.08);
+}
+
+.statLabel {
+  font-size: clamp(12px, 1.5vw, 14px);
+}
+
+.statValue {
+  font-size: clamp(14px, 1.8vw, 16px);
+}
+
+/* Submissions.tsx styles */
+.submissionsCard {
+  composes: card;
+  width: clamp(300px, 80vw, 480px);
+}
+
+.submissionsTitle {
+  margin-bottom: 20px;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  background-color: transparent;
+  min-width: 280px;
+  width: 100%;
+}
+
+.tableRow {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tableRow:hover {
+  transform: translateX(6px);
+  opacity: 0.9;
+}
+
+.tableCell {
+  padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 14px);
+}
+
+.tableCellLeft {
+  padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 14px);
+  text-align: left;
+}
+
+.tableCellCenter {
+  padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 14px);
+  text-align: center;
+}
+
+.emptyCell {
+  padding: 20px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .table {
+    min-width: 300px;
+  }
+  
+  .headerContainer {
+    padding: 12px;
+  }
+}

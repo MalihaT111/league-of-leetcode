@@ -1,0 +1,53 @@
+.title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+.performancePaper {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  width: 380px;
+  height: 260px;
+}
+
+.statRow {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+}
+
+.statValue {
+  font-family: monospace;
+}
+
+.statValueWinner {
+  color: #06d6a0;
+}
+
+.statValueLoser {
+  color: #ff6b6b;
+}
+
+.statValueMemory {
+  color: #ffd166;
+}
+
+.statValueNA {
+  color: #888888;
+}
+
+.problemTitle {
+  color: #ffd166;
+}
+
+.duration {
+  color: #06d6a0;
+}
+
+.eloWinner {
+  color: #06d6a0;
+  font-weight: 700;
+}
+
+.eloLoser {
+  color: #ff6b6b;
+  font-weight: 700;
+}
