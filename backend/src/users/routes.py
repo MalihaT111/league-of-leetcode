@@ -55,6 +55,7 @@ async def get_leaderboard(db: AsyncSession = Depends(get_db)):
     leaderboard = [
         {
             "rank": rank,
+            "id": user.id,
             "username": user.leetcode_username,
             "elo": user.user_elo,
             "winstreak": user.winstreak

@@ -1,5 +1,5 @@
 import { Flex, Title, Text, Button, Stack } from "@mantine/core";
-import Navbar from "../navbar";
+import Navbar from "../all/Navbar";
 import { montserrat, orbitron } from "@/app/fonts";
 import { ProfileBox } from "../profile/profilebox";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -31,14 +31,9 @@ export default function Matchmaking({ user, seconds, handleLeaveQueue, isLeaving
     >
       <Navbar />
       <Title
-        style={{
-          fontSize: "70px",
-          fontStyle: "italic",
-          fontWeight: 700,
-          lineHeight: "1",
-          fontFamily: "var(--font-montserrat), sans-serif",
-        }}
+        className="title-gradient"
         order={1}
+        style={{ fontSize: "4.5rem" }}
       >
         MATCHMAKING
       </Title>

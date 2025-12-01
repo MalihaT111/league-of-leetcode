@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flex, Title, Text, Button, Anchor } from "@mantine/core";
 import { useRouter } from "next/navigation";
-import Navbar from "../navbar";
+import Navbar from "../all/Navbar";
 import { ProfileBox } from "../profile/profilebox";
 import { orbitron, montserrat } from "@/app/fonts";
 import { useSubmitSolution, useMatchStatus, useMatchRatingPreview } from "@/lib/api/queries/matchmaking";
@@ -212,8 +212,8 @@ export default function MatchFound({
       {/* Title */}
       <Title
         order={1}
-        className={montserrat.className}
-        style={{ fontSize: "40px", fontWeight: 700 }}
+        className="title-gradient"
+        style={{ fontSize: "3rem" }}
       >
         MATCH FOUND
       </Title>

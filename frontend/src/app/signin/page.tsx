@@ -75,13 +75,9 @@ export default function SignInPage() {
           <Box ta="center">
             <Title
               order={1}
-              c="white"
-              className={montserrat.className}
+              className="title-gradient"
               style={{
-                fontSize: "32px",
-                fontWeight: 700,
-                fontStyle: "italic",
-                letterSpacing: 1,
+                fontSize: "2.5rem",
                 marginBottom: "8px",
               }}
             >

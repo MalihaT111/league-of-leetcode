@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/all/LoadingScreen";
 
 export default function InitialAppLoader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

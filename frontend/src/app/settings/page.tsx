@@ -4,12 +4,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Flex, Title, Loader, Text } from "@mantine/core";
 import { montserrat } from "@/app/fonts";
 import SettingsContainer from "@/components/settings/settingscontainer";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/all/Navbar";
 import { AuthService } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/lib/api/queries/settings";
 import { useTopicValidation } from "@/lib/hooks/useTopicValidation";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/all/LoadingScreen";
 // import { debugTopicMapMatching } from "@/lib/utils/debugTopicMap"; // Uncomment to debug
 
 const TOPIC_NAMES = [
@@ -174,12 +174,8 @@ if (settingsHook.loading || !settingsHook.settings) {
       <Navbar />
       <Title
         order={1}
-        className={montserrat.className}
-        style={{
-          fontSize: "40px",
-          fontWeight: 700,
-          fontStyle: "italic",
-        }}
+        className="title-gradient"
+        style={{ fontSize: "3rem" }}
       >
         SETTINGS
       </Title>

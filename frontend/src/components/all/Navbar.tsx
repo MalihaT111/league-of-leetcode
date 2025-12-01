@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLogout } from "@/hooks/useLogout";
-import styles from "./navbar.module.css";
+import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const router = useRouter();
@@ -27,6 +27,9 @@ export default function Navbar() {
   };
 
   const isHome = pathname.includes("/home");
+  const isLeaderboard = pathname.includes("/leaderboard");
+  const isFriends = pathname.includes("/friends");
+  const isSettings = pathname.includes("/settings");
 
 
   return (
@@ -46,10 +49,16 @@ export default function Navbar() {
         </Link>
       )}
 
-      {/* These always show */}
-      <Link href="/leaderboard" className={styles.navItem}>LEADERBOARD</Link>
-      <Link href="/friends" className={styles.navItem}>FRIENDS</Link>
-      <Link href="/settings" className={styles.navItem}>SETTINGS</Link>
+      {/* These show conditionally based on current page */}
+      {!isLeaderboard && (
+        <Link href="/leaderboard" className={styles.navItem}>LEADERBOARD</Link>
+      )}
+      {!isFriends && (
+        <Link href="/friends" className={styles.navItem}>FRIENDS</Link>
+      )}
+      {!isSettings && (
+        <Link href="/settings" className={styles.navItem}>SETTINGS</Link>
+      )}
 
       {/* Profile logic */}
       <span className={styles.navItem} onClick={handleProfileClick}>

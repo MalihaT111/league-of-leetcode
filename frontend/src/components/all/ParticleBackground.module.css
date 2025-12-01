@@ -1,0 +1,31 @@
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgb(154, 105, 245);
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: float 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(var(--x-move), var(--y-move));
+    opacity: 0;
+  }
+}
