@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Flex, Title, Loader, Text } from "@mantine/core";
+import { Flex, Title } from "@mantine/core";
 import { montserrat } from "@/app/fonts";
 import SettingsContainer from "@/components/settings/settingscontainer";
 import Navbar from "@/components/navbar";
@@ -127,21 +127,7 @@ export default function SettingsPage() {
 
   // Show loading state while user is being fetched
   if (loading || !userId) {
-    return (
-      <Flex
-        direction="column"
-        align="center"
-        justify="center"
-        mih="100vh"
-        bg="#1a1a1a"
-        c="white"
-      >
-        <Loader color="yellow" size="lg" />
-        <Text mt="md" size="lg">
-          Loading your settings...
-        </Text>
-      </Flex>
-    );
+    return null;
   }
 
   // Now we have userId, safe to call hooks
@@ -170,21 +156,7 @@ function SettingsPageContent({
 
   // Show loading state while settings are being fetched
   if (settingsHook.loading || !settingsHook.settings) {
-    return (
-      <Flex
-        direction="column"
-        align="center"
-        justify="center"
-        mih="100vh"
-        bg="#1a1a1a"
-        c="white"
-      >
-        <Loader color="yellow" size="lg" />
-        <Text mt="md" size="lg">
-          Loading your settings...
-        </Text>
-      </Flex>
-    );
+    return null;
   }
 
   return (

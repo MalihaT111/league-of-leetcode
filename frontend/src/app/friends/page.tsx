@@ -55,11 +55,7 @@ export default function FriendsPage() {
   const removeFriendMutation = useRemoveFriend();
 
   if (!userId) {
-    return (
-      <Flex h="100vh" align="center" justify="center" bg="#1a1a1a">
-        <Text c="white">Loading...</Text>
-      </Flex>
-    );
+    return null;
   }
 
   return (
@@ -102,9 +98,7 @@ export default function FriendsPage() {
 
         {/* Friends List Tab */}
         <Tabs.Panel value="friends" pt="xl">
-          {friendsLoading ? (
-            <Text c="dimmed">Loading friends...</Text>
-          ) : friendsList && friendsList.length > 0 ? (
+          {friendsList && friendsList.length > 0 ? (
             <Stack gap="md">
               {friendsList.map((friend: any) => (
                 <Card key={friend.user_id} bg="#2a2a2a" p="md">
@@ -151,9 +145,7 @@ export default function FriendsPage() {
               <Text fw={600} size="lg" mb="md">
                 Received ({friendRequests?.received?.length || 0})
               </Text>
-              {requestsLoading ? (
-                <Text c="dimmed">Loading...</Text>
-              ) : friendRequests?.received && friendRequests.received.length > 0 ? (
+              {friendRequests?.received && friendRequests.received.length > 0 ? (
                 <Stack gap="md">
                   {friendRequests.received.map((request: any) => (
                     <Card key={request.user_id} bg="#2a2a2a" p="md">
@@ -204,9 +196,7 @@ export default function FriendsPage() {
               <Text fw={600} size="lg" mb="md">
                 Sent ({friendRequests?.sent?.length || 0})
               </Text>
-              {requestsLoading ? (
-                <Text c="dimmed">Loading...</Text>
-              ) : friendRequests?.sent && friendRequests.sent.length > 0 ? (
+              {friendRequests?.sent && friendRequests.sent.length > 0 ? (
                 <Stack gap="md">
                   {friendRequests.sent.map((request: any) => (
                     <Card key={request.user_id} bg="#2a2a2a" p="md">
