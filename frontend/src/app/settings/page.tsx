@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Flex, Title } from "@mantine/core";
+import { Flex, Title, Loader, Text } from "@mantine/core";
 import { montserrat } from "@/app/fonts";
 import SettingsContainer from "@/components/settings/settingscontainer";
 import Navbar from "@/components/navbar";
@@ -9,6 +9,7 @@ import { AuthService } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/lib/api/queries/settings";
 import { useTopicValidation } from "@/lib/hooks/useTopicValidation";
+import LoadingScreen from "@/components/LoadingScreen";
 // import { debugTopicMapMatching } from "@/lib/utils/debugTopicMap"; // Uncomment to debug
 
 const TOPIC_NAMES = [
@@ -126,9 +127,9 @@ export default function SettingsPage() {
   const topicNames = useMemo(() => TOPIC_NAMES, []);
 
   // Show loading state while user is being fetched
-  if (loading || !userId) {
-    return null;
-  }
+if (loading || !userId) {
+  return <LoadingScreen message="LOADING USER..." />;
+}
 
   // Now we have userId, safe to call hooks
   return <SettingsPageContent userId={userId} topicNames={topicNames} />;
@@ -155,9 +156,10 @@ function SettingsPageContent({
   );
 
   // Show loading state while settings are being fetched
-  if (settingsHook.loading || !settingsHook.settings) {
-    return null;
-  }
+if (settingsHook.loading || !settingsHook.settings) {
+  return <LoadingScreen message="LOADING SETTINGS..." />;
+}
+
 
   return (
     <Flex
