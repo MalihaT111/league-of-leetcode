@@ -1,0 +1,127 @@
+/* Friend card */
+.friendCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(189, 155, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 20px;
+  transition: all 0.2s ease;
+}
+
+.friendCard:hover {
+  background: rgba(189, 155, 255, 0.06);
+  border-color: rgba(189, 155, 255, 0.25);
+  transform: translateX(4px);
+}
+
+/* Avatar */
+.avatar {
+  border: 1px solid rgba(189, 155, 255, 0.4);
+  background: rgba(189, 155, 255, 0.15);
+  color: rgba(220, 220, 255, 0.9);
+}
+
+/* Username text */
+.username {
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.leetcodeUsername {
+  color: rgba(220, 220, 255, 0.5);
+  font-size: 13px;
+}
+
+/* ELO badge */
+.eloBadge {
+  background: rgba(189, 155, 255, 0.15);
+  border: 1px solid rgba(189, 155, 255, 0.3);
+  color: rgba(220, 220, 255, 0.9);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Pending badge */
+.pendingBadge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(220, 220, 255, 0.6);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Action buttons */
+.actionButton {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.addButton {
+  background: rgba(189, 155, 255, 0.2);
+  border: 1px solid rgba(189, 155, 255, 0.4);
+  color: rgba(220, 220, 255, 0.9);
+}
+
+.addButton:hover:not(:disabled) {
+  background: rgba(189, 155, 255, 0.35);
+  box-shadow: 0 0 12px rgba(189, 155, 255, 0.25);
+}
+
+.acceptButton {
+  background: rgba(6, 214, 160, 0.15);
+  border: 1px solid rgba(6, 214, 160, 0.4);
+  color: #9dffbd;
+}
+
+.acceptButton:hover:not(:disabled) {
+  background: rgba(6, 214, 160, 0.25);
+  box-shadow: 0 0 12px rgba(6, 214, 160, 0.25);
+}
+
+.removeButton {
+  background: rgba(255, 77, 77, 0.12);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: #ff9b9b;
+}
+
+.removeButton:hover:not(:disabled) {
+  background: rgba(255, 77, 77, 0.2);
+  box-shadow: 0 0 12px rgba(255, 77, 77, 0.2);
+}
+
+/* Section title */
+.sectionTitle {
+  color: rgba(220, 220, 255, 0.85);
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(189, 155, 255, 0.15);
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(220, 220, 255, 0.5);
+  font-size: 14px;
+}
