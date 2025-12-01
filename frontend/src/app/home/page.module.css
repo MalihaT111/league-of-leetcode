@@ -91,12 +91,11 @@
 }
 
 .title {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-size: 72px;
-
-  font-weight: 500;
-  text-transform: uppercase;
-  margin-bottom: 50px;
+  font-family: 'Migra', serif;
+  font-weight: 600;
+  font-size: 4rem;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
 
 background: linear-gradient(
   90deg,

@@ -3,6 +3,7 @@ import "./globals.css";
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "./globals.css";
+import "./fonts.css";
 import { Space_Grotesk } from "next/font/google";
 import { montserrat, orbitron, geistSans, geistMono } from "./fonts";
 import ReactQueryProvider from "@/lib/queryProvider";

@@ -208,5 +208,5 @@ export default function MatchmakingPage() {
   }
 
   // Loading state while getting user
-  return <div>Loading...</div>;
+  return null;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { useRouter } from "next/navigation";
@@ -80,50 +80,36 @@ function ChromeCore() {
 }
 
 function SwordModel({ onClick }: { onClick: (e: any) => void }) {
-    
-  const { scene: originalScene } = useGLTF("/Untitled.glb");
-  const sceneRef = useRef<THREE.Group | null>(null);
+  const startTime = performance.now();
+  const { scene: originalScene } = useGLTF("/blob.glb");
 
-  if (!sceneRef.current) {
-    // Clone the scene once to avoid modifying the cached original
+  // Use useMemo to cache the processed scene
+  const processedScene = useMemo(() => {
+    console.log("⏱️ Model loaded in:", performance.now() - startTime, "ms");
+    const cloneStart = performance.now();
     const scene = originalScene.clone(true);
+    console.log("⏱️ Scene cloned in:", performance.now() - cloneStart, "ms");
+
+    const materialStart = performance.now();
+    // Create a single shared material instead of one per mesh
+    const sharedMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color("#5b4777"),
+      metalness: 1.0,
+      roughness: 0.15,
+      envMapIntensity: 1.2,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+    });
 
     // --- CHROME MATERIAL OVERRIDE ---
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
-
-        // ------- ABSOLUTE NECESSARY FIX -------
-        if (mesh.geometry) {
-          mesh.geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(0), 3));
-        }
-
-        // remove all baked maps (GLB contains grayscale ones)
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        materials.forEach((mat) => {
-          if (mat && 'map' in mat) {
-            const stdMat = mat as THREE.MeshStandardMaterial;
-            stdMat.map = null;
-            stdMat.roughnessMap = null;
-            stdMat.metalnessMap = null;
-            stdMat.normalMap = null;
-            stdMat.aoMap = null;
-            stdMat.emissiveMap = null;
-          }
-        });
-
-        // ------- YOUR CHROME MATERIAL -------
-        mesh.material = new THREE.MeshPhysicalMaterial({
-        //   color: new THREE.Color("#ffb36b"),
-        color: new THREE.Color("#5b4777"),
-          metalness: 1.0,
-          roughness: 0.15,
-          envMapIntensity: 1.2,
-          clearcoat: 1.0,
-          clearcoatRoughness: 0.05,
-        });
+        // Use the shared material for all meshes
+        mesh.material = sharedMaterial;
       }
     });
+    console.log("⏱️ Materials processed in:", performance.now() - materialStart, "ms");
 
     // --- CENTER & SCALE ---
     const box = new THREE.Box3().setFromObject(scene);
@@ -138,12 +124,13 @@ function SwordModel({ onClick }: { onClick: (e: any) => void }) {
     const scale = 2 / maxSide;
     scene.scale.setScalar(scale);
 
-    sceneRef.current = scene;
-  }
+    console.log("⏱️ Total initialization:", performance.now() - startTime, "ms");
+    return scene;
+  }, [originalScene, startTime]);
 
   return (
     <primitive
-      object={sceneRef.current}
+      object={processedScene}
       rotation={[-Math.PI / 2, 0, 0.1]}
       onClick={onClick}
       onPointerOver={(e: any) => {
@@ -173,7 +160,12 @@ export default function TranscendenceSword() {
         camera={{ position: [0, 0, 2.5], fov: 40 }}
         style={{ width: "100%", height: "100%" }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <mesh>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color="#5b4777" wireframe />
+          </mesh>
+        }>
           <ambientLight intensity={0.8} />
           <directionalLight position={[5, 5, 10]} intensity={1.2} />
           <pointLight position={[-5, -3, -5]} intensity={0.7} color="#ffdca8" />
@@ -199,4 +191,4 @@ export default function TranscendenceSword() {
   );
 }
 
-useGLTF.preload("/Untitled.glb");
+useGLTF.preload("/blob.glb");

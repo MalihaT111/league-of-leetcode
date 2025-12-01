@@ -14,7 +14,7 @@ export default function ProfilePage() {
 
   const { data, isLoading, error } = useProfileQuery(userId);
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return null;
   if (error || !data) return <p>Failed to load profile data.</p>;
 
   // ✅ Destructure to match backend JSON
