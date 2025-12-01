@@ -1,0 +1,242 @@
+/* Settings Page */
+.page {
+  min-height: 100vh;
+  padding: clamp(16px, 4vw, 40px);
+  padding-top: clamp(100px, 15vh, 140px);
+  padding-bottom: 60px;
+  background: #0d0d0f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  margin-bottom: clamp(24px, 4vh, 40px);
+}
+
+/* Unified glowing container */
+.unifiedContainer {
+  background: rgba(10, 10, 20, 0.4);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(189, 155, 255, 0.2);
+  box-shadow: 0 0 40px rgba(189, 155, 255, 0.1);
+  border-radius: 20px;
+  padding: clamp(24px, 4vw, 40px);
+  max-width: 900px;
+  width: 100%;
+}
+
+/* Two-column grid */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: clamp(24px, 4vw, 40px);
+  align-items: start;
+}
+
+/* Glass card base */
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(189, 155, 255, 0.15);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+/* Left panel - Toggles */
+.togglesPanel {
+  composes: card;
+}
+
+/* Panel titles - same style as main title */
+.panelTitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Settings row - normalized */
+.settingsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: background 0.2s ease;
+}
+
+.settingsRow:hover {
+  background: rgba(189, 155, 255, 0.06);
+}
+
+.settingsRow:last-child {
+  margin-bottom: 0;
+}
+
+.settingsLabel {
+  font-weight: 600;
+  font-size: 14px;
+  color: rgba(220, 220, 255, 0.85);
+}
+
+/* Username card */
+.usernameCard {
+  background: rgba(189, 155, 255, 0.08);
+  border: 1px solid rgba(189, 155, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Status badge */
+.statusBadge {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.statusReady {
+  background: rgba(6, 214, 160, 0.12);
+  border: 1px solid rgba(6, 214, 160, 0.4);
+  color: #9dffbd;
+}
+
+.statusWarning {
+  background: rgba(255, 165, 0, 0.12);
+  border: 1px solid rgba(255, 165, 0, 0.4);
+  color: #ffd699;
+}
+
+.statusError {
+  background: rgba(255, 77, 77, 0.12);
+  border: 1px solid rgba(255, 77, 77, 0.4);
+  color: #ff9b9b;
+}
+
+/* Compact alert */
+.alertCompact {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.alertError {
+  background: rgba(255, 77, 77, 0.08);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: rgba(255, 155, 155, 0.9);
+}
+
+.alertWarning {
+  background: rgba(255, 165, 0, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  color: rgba(255, 214, 153, 0.9);
+}
+
+/* Right panel - Filter types */
+.filterPanel {
+  composes: card;
+}
+
+
+
+/* Search input */
+.searchInput {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(189, 155, 255, 0.15);
+  border-radius: 10px;
+  color: rgba(220, 220, 255, 1);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: rgba(189, 155, 255, 0.4);
+}
+
+.searchInput::placeholder {
+  color: rgba(220, 220, 255, 0.35);
+}
+
+/* Action buttons */
+.actionRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.actionButton {
+  background: rgba(189, 155, 255, 0.1);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  color: rgba(220, 220, 255, 0.85);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: rgba(189, 155, 255, 0.2);
+  border-color: rgba(189, 155, 255, 0.4);
+}
+
+/* Topic chips container */
+.chipsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px;
+}
+
+/* Topic chip */
+.chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(189, 155, 255, 0.15);
+  color: rgba(220, 220, 255, 0.8);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: rgba(189, 155, 255, 0.15);
+}
+
+.chipActive {
+  background: rgba(189, 155, 255, 0.25);
+  border-color: rgba(189, 155, 255, 0.5);
+  color: white;
+}
+
+.chipInvalid {
+  border-color: rgba(255, 107, 107, 0.5);
+  color: #ff9b9b;
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .unifiedContainer {
+    padding: 20px;
+  }
+}

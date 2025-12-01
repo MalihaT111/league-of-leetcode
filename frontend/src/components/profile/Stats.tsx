@@ -25,17 +25,17 @@ export default function ProfileStatsCard({
 }) {
   return (
     <Card radius="md" p="xl" className={styles.statsCard}>
-      <Title
-        order={2}
-        ta="center"
-        className={`title-gradient ${styles.statsTitle}`}
-      >
-        PLAYER STATS
-      </Title>
+      <Flex direction="column" h="100%" justify="space-evenly">
+        <Title
+          order={2}
+          ta="center"
+          className={`title-gradient ${styles.statsTitle}`}
+        >
+          PLAYER STATS
+        </Title>
 
-      <ProfileHeader username={user.username || `user_${user.id}`} />
+        <ProfileHeader username={user.username || `user_${user.id}`} />
 
-      <Flex direction="column" gap="sm" w="100%" mt="lg">
         <Stat label="ELO" value={user.elo ?? "—"} />
         <Stat label="MATCHES WON" value={stats.matches_won ?? 0} />
         <Stat label="WIN RATE" value={`${stats.win_rate ?? 0}%`} />

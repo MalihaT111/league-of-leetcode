@@ -13,6 +13,7 @@
   z-index: 200;
   pointer-events: auto;
   flex-wrap: wrap;
+  background: linear-gradient(to bottom, #0d0d0f 0%, #0d0d0f 60%, transparent 100%);
 }
 
 /* BASE NAV ITEMS */

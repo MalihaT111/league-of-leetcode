@@ -30,7 +30,8 @@ export default function Navbar() {
   const isLeaderboard = pathname.includes("/leaderboard");
   const isFriends = pathname.includes("/friends");
   const isSettings = pathname.includes("/settings");
-
+  const isProfile = pathname.includes("/profile");
+  const isMatch = pathname.includes("/match");
 
   return (
     <div className={styles.navbar}>
@@ -42,8 +43,8 @@ export default function Navbar() {
         </Link>
       )}
 
-      {/* MATCH (only show on pages that are NOT /home) */}
-      {!isHome && (
+      {/* MATCH (hide on home and match pages) */}
+      {!isHome && !isMatch && (
         <Link href="/match" className={styles.navItem}>
           MATCH
         </Link>
@@ -60,10 +61,12 @@ export default function Navbar() {
         <Link href="/settings" className={styles.navItem}>SETTINGS</Link>
       )}
 
-      {/* Profile logic */}
-      <span className={styles.navItem} onClick={handleProfileClick}>
-        PROFILE
-      </span>
+      {/* Profile logic - hide when on profile page */}
+      {!isProfile && (
+        <span className={styles.navItem} onClick={handleProfileClick}>
+          PROFILE
+        </span>
+      )}
 
       {/* Logout logic */}
       <span className={styles.navItemLogout} onClick={handleLogoutClick}>

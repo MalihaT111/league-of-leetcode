@@ -1,20 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Card,
-  Title,
-  Text,
-  TextInput,
-  Chip,
-  Flex,
-  ScrollArea,
-  Button,
-  Group,
-  Tooltip,
-  Alert,
-  List,
-} from "@mantine/core";
+import { Title, Text, ScrollArea, Flex, Tooltip, Stack, List } from "@mantine/core";
 import { ValidationResult } from "@/lib/hooks/useTopicValidation";
 import { Settings } from "@/lib/api/queries/settings";
 
@@ -42,34 +29,27 @@ export default function FilterTypesCard({
   const { settings, loading, error, toggleTopic, isTopicOn, updateSettings } =
     settingsHook;
 
-  // ❗ Conditional returns AFTER all hooks
-  if (loading || !settings)
-    return <Text c="gray.4">Loading settings...</Text>;
+  if (loading || !settings) {
+    return <Text c="rgba(220, 220, 255, 0.6)">Loading settings...</Text>;
+  }
 
-  if (error)
-    return (
-      <Text c="red" fw={700}>
-        Failed to load settings
-      </Text>
-    );
+  if (error) {
+    return <Text c="#ff9b9b" fw={700}>Failed to load settings</Text>;
+  }
 
-  // 🔎 Filtered list based on search term
   const filtered = topicNames.filter((f) =>
     f && f.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ✅ "Select All" → sets all topics active
   const handleSelectAll = () => {
     const allIndices = topicNames.map((_, idx) => idx);
     updateSettings({ topics: allIndices });
   };
 
-  // 🔄 "Reset All" → clears all selected topics
   const handleResetAll = () => {
     updateSettings({ topics: [] });
   };
 
-  // 🔧 Fix invalid topics by removing them
   const handleFixTopics = () => {
     const validTopics = (settings.topics || []).filter((topicIdx) => {
       const topicName = topicNames[topicIdx];
@@ -79,233 +59,219 @@ export default function FilterTypesCard({
   };
 
   return (
-    <Card shadow="sm" radius="md" p="lg" w={420} bg="gray.3">
+    <div
+      style={{
+        background: "rgba(10, 10, 20, 0.45)",
+        backdropFilter: "blur(12px)",
+        border: "1px solid rgba(189, 155, 255, 0.25)",
+        boxShadow: "0 0 25px rgba(189, 155, 255, 0.12)",
+        borderRadius: "14px",
+        padding: "24px",
+        width: "440px",
+      }}
+    >
       <Title
         order={3}
-        fw={900}
-        fz="lg"
-        mb="sm"
-        c="black"
         ta="center"
-        style={{ letterSpacing: 0.5, fontStyle: "italic" }}
+        mb="md"
+        style={{
+          color: "rgba(220, 220, 255, 0.9)",
+          fontSize: "1.2rem",
+          letterSpacing: "1px",
+        }}
       >
         FILTER TYPES
       </Title>
 
-      <Card
-        bg="black"
-        p="md"
-        radius="md"
-        withBorder
+      {/* Inner container */}
+      <div
         style={{
-          borderColor: "#2f2f2f",
-          minHeight: 250,
-          maxHeight: 340,
-          overflow: "hidden",
+          background: "rgba(0, 0, 0, 0.4)",
+          border: "1px solid rgba(189, 155, 255, 0.15)",
+          borderRadius: "10px",
+          padding: "16px",
+          minHeight: "280px",
+          maxHeight: "360px",
         }}
       >
-        <TextInput
-          placeholder="search"
+        {/* Search input */}
+        <input
+          type="text"
+          placeholder="Search topics..."
           value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          variant="unstyled"
-          mb="sm"
-          styles={{
-            input: {
-              backgroundColor: "#1a1a1a",
-              color: "white",
-              padding: "8px",
-              borderRadius: "4px",
-            },
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: "100%",
+            background: "rgba(255, 255, 255, 0.05)",
+            border: "1px solid rgba(189, 155, 255, 0.2)",
+            borderRadius: "8px",
+            color: "rgba(220, 220, 255, 1)",
+            padding: "10px 14px",
+            marginBottom: "12px",
+            fontSize: "14px",
+            outline: "none",
           }}
         />
 
-        {/* 🔘 Action Buttons */}
-        <Group justify="space-between" mb="sm">
-          <Button
-            variant="subtle"
-            color="gray"
-            size="xs"
-            radius="xl"
+        {/* Action buttons */}
+        <div style={{ display: "flex", gap: "12px", marginBottom: "14px" }}>
+          <button
             onClick={handleSelectAll}
-            styles={{
-              root: {
-                backgroundColor: "#2a2a2a",
-                color: "white",
-                fontWeight: 600,
-                "&:hover": { backgroundColor: "#3a3a3a" },
-              },
+            style={{
+              background: "rgba(189, 155, 255, 0.15)",
+              border: "1px solid rgba(189, 155, 255, 0.3)",
+              color: "rgba(220, 220, 255, 0.9)",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontSize: "12px",
+              fontWeight: 600,
+              cursor: "pointer",
             }}
           >
             Select All
-          </Button>
-
-          <Button
-            variant="subtle"
-            color="gray"
-            size="xs"
-            radius="xl"
+          </button>
+          <button
             onClick={handleResetAll}
-            styles={{
-              root: {
-                backgroundColor: "#2a2a2a",
-                color: "white",
-                fontWeight: 600,
-                "&:hover": { backgroundColor: "#3a3a3a" },
-              },
+            style={{
+              background: "rgba(189, 155, 255, 0.15)",
+              border: "1px solid rgba(189, 155, 255, 0.3)",
+              color: "rgba(220, 220, 255, 0.9)",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontSize: "12px",
+              fontWeight: 600,
+              cursor: "pointer",
             }}
           >
             Reset All
-          </Button>
-        </Group>
+          </button>
+        </div>
 
-        <ScrollArea
-          h={230}
-          scrollbarSize={6}
-          scrollHideDelay={500}
-          styles={{
-            scrollbar: { background: "#1a1a1a" },
-            thumb: { background: "#444", "&:hover": { background: "#666" } },
-          }}
-        >
+        {/* Topic chips */}
+        <ScrollArea h={200} scrollbarSize={6}>
           <Flex wrap="wrap" gap="xs">
             {filtered.map((filter) => {
               const idx = topicNames.indexOf(filter);
               const isInvalid = validation.isTopicInvalid(filter);
               const isChecked = isTopicOn(idx);
 
+              const chipStyle: React.CSSProperties = {
+                background: isChecked
+                  ? "rgba(189, 155, 255, 0.3)"
+                  : "rgba(255, 255, 255, 0.08)",
+                border: isInvalid
+                  ? "1px solid #ff6b6b"
+                  : isChecked
+                  ? "1px solid rgba(189, 155, 255, 0.6)"
+                  : "1px solid rgba(189, 155, 255, 0.2)",
+                color: isInvalid ? "#ff9b9b" : isChecked ? "white" : "rgba(220, 220, 255, 0.85)",
+                padding: "6px 14px",
+                borderRadius: "20px",
+                fontSize: "13px",
+                fontWeight: 500,
+                cursor: "pointer",
+                boxShadow: isInvalid ? "0 0 8px rgba(255, 107, 107, 0.3)" : "none",
+                transition: "all 0.2s ease",
+              };
+
               return (
                 <Tooltip
                   key={filter}
-                  label={
-                    isInvalid
-                      ? "This topic has no problems at the selected difficulty."
-                      : ""
-                  }
+                  label="This topic has no problems at the selected difficulty."
                   disabled={!isInvalid}
                   withArrow
                   color="red"
                 >
-                  <Chip
-                    color="gray"
-                    size="sm"
-                    radius="xl"
-                    variant="filled"
-                    checked={isChecked}
-                    onClick={() => toggleTopic(idx)}
-                    className={isInvalid ? "invalid-topic" : ""}
-                    styles={{
-                      root: {
-                        backgroundColor: isChecked ? "#6b7280" : "#2a2a2a",
-                        color: isInvalid ? "#ff4d4d" : "white",
-                        fontWeight: 600,
-                        textAlign: "center",
-                        borderRadius: "9999px",
-                        transition: "all 150ms ease",
-                        border: isInvalid ? "2px solid #ff4d4d" : "none",
-                        boxShadow: isInvalid
-                          ? "0 0 6px rgba(255, 77, 77, 0.4)"
-                          : "none",
-                        cursor: "pointer",
-                      },
-                    }}
-                  >
+                  <span style={chipStyle} onClick={() => toggleTopic(idx)}>
                     {filter}
-                  </Chip>
+                  </span>
                 </Tooltip>
               );
             })}
           </Flex>
         </ScrollArea>
-      </Card>
+      </div>
 
-      {/* ⚠️ Hard Block Error */}
+      {/* Hard Block Error */}
       {validation.blockType === "hard" && validation.errorMessage && (
-        <Alert
-          color="red"
-          title="Cannot Match"
-          mt="md"
-          styles={{
-            root: {
-              backgroundColor: "#3b0c0c",
-              border: "2px solid #ff4d4d",
-              borderRadius: "8px",
-            },
-            title: {
-              color: "#ffcccc",
-              fontWeight: 700,
-              fontSize: "16px",
-            },
-            message: {
-              color: "#ffcccc",
-            },
+        <div
+          style={{
+            background: "rgba(255, 77, 77, 0.1)",
+            border: "1px solid rgba(255, 77, 77, 0.4)",
+            borderRadius: "10px",
+            padding: "16px",
+            marginTop: "16px",
           }}
         >
-          <Text size="sm" fw={600} mb="xs">
+          <Text fw={700} size="sm" c="#ff9b9b" mb={8}>
+            ❌ Cannot Match
+          </Text>
+          <Text size="xs" c="rgba(255, 155, 155, 0.9)" mb={8}>
             {validation.errorMessage}
           </Text>
           {validation.invalidTopics.length > 0 && (
-            <>
-              <Text size="sm" fw={500} mt="sm" mb="xs">
+            <Stack gap={4} mt="sm">
+              <Text size="xs" fw={600} c="rgba(255, 155, 155, 0.8)">
                 Invalid topics:
               </Text>
-              <List size="sm" mb="xs">
-                {validation.invalidTopics.map((topic) => (
+              <List size="xs" c="rgba(255, 155, 155, 0.7)">
+                {validation.invalidTopics.slice(0, 5).map((topic) => (
                   <List.Item key={topic}>{topic}</List.Item>
                 ))}
+                {validation.invalidTopics.length > 5 && (
+                  <List.Item>...and {validation.invalidTopics.length - 5} more</List.Item>
+                )}
               </List>
-            </>
+            </Stack>
           )}
-          <Text size="sm" mt="xs" c="dimmed">
-            You must fix your settings before matchmaking.
-          </Text>
-        </Alert>
+        </div>
       )}
 
-      {/* 🟡 Soft Block Warning */}
+      {/* Soft Block Warning */}
       {validation.blockType === "soft" && validation.errorMessage && (
-        <Alert
-          color="yellow"
-          title="Warning"
-          mt="md"
-          styles={{
-            root: {
-              backgroundColor: "#3b2c0c",
-              border: "1px solid #ffa500",
-              borderRadius: "8px",
-            },
-            title: {
-              color: "#ffd699",
-              fontWeight: 700,
-            },
-            message: {
-              color: "#ffd699",
-            },
+        <div
+          style={{
+            background: "rgba(255, 165, 0, 0.1)",
+            border: "1px solid rgba(255, 165, 0, 0.4)",
+            borderRadius: "10px",
+            padding: "16px",
+            marginTop: "16px",
           }}
         >
-          <Text size="sm" mb="xs">
+          <Text fw={700} size="sm" c="#ffd699" mb={8}>
+            ⚠️ Warning
+          </Text>
+          <Text size="xs" c="rgba(255, 214, 153, 0.9)" mb={8}>
             {validation.errorMessage}
           </Text>
-          <List size="sm" mb="xs">
-            {validation.invalidTopics.map((topic) => (
+          <List size="xs" c="rgba(255, 214, 153, 0.8)" mb="sm">
+            {validation.invalidTopics.slice(0, 5).map((topic) => (
               <List.Item key={topic}>{topic}</List.Item>
             ))}
+            {validation.invalidTopics.length > 5 && (
+              <List.Item>...and {validation.invalidTopics.length - 5} more</List.Item>
+            )}
           </List>
-          <Text size="sm" mt="xs">
-            You can still match with your {validation.validTopics.length} valid
-            topic(s).
+          <Text size="xs" c="rgba(255, 214, 153, 0.7)" mb="sm">
+            You can still match with your {validation.validTopics.length} valid topic(s).
           </Text>
-          <Button
-            size="xs"
-            color="yellow"
-            variant="light"
-            mt="sm"
+          <button
             onClick={handleFixTopics}
+            style={{
+              background: "rgba(255, 165, 0, 0.2)",
+              border: "1px solid rgba(255, 165, 0, 0.5)",
+              color: "#ffd699",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
           >
             Remove Invalid Topics
-          </Button>
-        </Alert>
+          </button>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }

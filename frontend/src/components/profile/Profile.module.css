@@ -52,7 +52,8 @@
 .statsCard {
   composes: card;
   width: clamp(280px, 90vw, 360px);
-  height: 459px;
+  min-height: 459px;
+  height: auto;
 }
 
 .statsTitle {
@@ -83,6 +84,8 @@
 .submissionsCard {
   composes: card;
   width: clamp(300px, 80vw, 480px);
+  min-height: 459px;
+  height: auto;
 }
 
 .submissionsTitle {
