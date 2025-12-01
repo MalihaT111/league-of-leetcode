@@ -1,0 +1,97 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(16px, 4vw, 40px);
+  background: #0d0d0f;
+}
+
+.card {
+  width: clamp(320px, 90vw, 420px);
+  background: rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  box-shadow: 0 0 25px rgba(189, 155, 255, 0.12);
+}
+
+.title {
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+}
+
+.alert {
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+}
+
+.inputLabel {
+  color: rgba(220, 220, 255, 0.85);
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  color: white;
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: rgba(189, 155, 255, 0.6);
+  box-shadow: 0 0 10px rgba(189, 155, 255, 0.2);
+}
+
+.input::placeholder {
+  color: rgba(220, 220, 255, 0.4);
+}
+
+.innerInput {
+  background: transparent;
+  color: white;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, rgba(189, 155, 255, 0.8), rgba(140, 120, 200, 0.8));
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, rgba(189, 155, 255, 1), rgba(140, 120, 200, 1));
+  box-shadow: 0 0 20px rgba(189, 155, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.link {
+  color: rgba(189, 155, 255, 0.9);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: rgba(189, 155, 255, 1);
+  text-decoration: underline;
+}
+
+.backLink {
+  color: rgba(220, 220, 255, 0.5);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: rgba(189, 155, 255, 0.9);
+}
