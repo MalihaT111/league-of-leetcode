@@ -11,7 +11,7 @@ import {
   Group,
 } from "@mantine/core";
 import { montserrat } from "../fonts";
-import { PlayerResult } from "@/components/playerresult";
+import { PlayerResult } from "@/components/match/Result";
 import { useState } from "react";
 
 export default function ResultsPage() {

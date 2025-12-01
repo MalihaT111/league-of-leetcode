@@ -1,0 +1,153 @@
+/* Wrapper - handles animations and sizing */
+.wrapper {
+  position: relative;
+  cursor: pointer;
+  border-radius: 14px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.wrapperLarge {
+  width: 360px;
+  z-index: 2;
+  animation: fadeInUp 0.5s ease 0.15s forwards;
+}
+
+.wrapperSmall {
+  width: 320px;
+  z-index: 1;
+  animation: fadeInUp 0.5s ease 0.3s forwards;
+}
+
+/* Winner wrapper - offset + scale */
+.wrapperWinner {
+  transform: scale(1.05) translateY(-4px);
+  transition: transform 0.35s ease;
+}
+
+.wrapperWinner:hover {
+  transform: scale(1.08) translateY(-4px);
+}
+
+/* Particle burst behind winner */
+.wrapperWinner::before {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  border-radius: 20px;
+  background: radial-gradient(circle, rgba(201, 182, 255, 0.3) 0%, transparent 70%);
+  animation: particleBurst 1s ease-out forwards;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes particleBurst {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Inner - handles background, smooth transitions */
+.inner {
+  width: 100%;
+  border-radius: 14px;
+  transition: all 0.35s ease;
+}
+
+/* Winner inner */
+.innerWinner {
+  padding: 20px 28px;
+  height: 70px;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(201, 182, 255, 0.3), rgba(168, 146, 255, 0.4));
+  border: 1px solid rgba(201, 182, 255, 0.6);
+  box-shadow: 0 0 25px rgba(201, 182, 255, 0.4);
+  color: white;
+  animation: winnerGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes winnerGlow {
+  0%, 100% { box-shadow: 0 0 25px rgba(201, 182, 255, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(201, 182, 255, 0.6); }
+}
+
+/* Active (selected but not winner) */
+.innerActive {
+  padding: 16px 24px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(189, 155, 255, 0.35);
+  color: white;
+  box-shadow: 0 0 15px rgba(189, 155, 255, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+/* Default (not selected) */
+.innerDefault {
+  padding: 16px 24px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(220, 220, 255, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.wrapper:hover .innerDefault {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(189, 155, 255, 0.3);
+}
+
+.wrapper:hover .innerActive {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Avatar */
+.avatar {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.35s ease;
+}
+
+.avatarLarge {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.avatarSmall {
+  width: 42px;
+  height: 42px;
+  font-size: 15px;
+}
+
+.avatarWinner {
+  background: linear-gradient(135deg, #d6ccff, #c9b6ff);
+  color: #1a1a2e;
+  box-shadow: 0 0 15px rgba(201, 182, 255, 0.5);
+}
+
+.avatarDefault {
+  background: rgba(220, 220, 255, 0.15);
+  color: rgba(220, 220, 255, 0.85);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+}
+
+/* Crown icon for winner */
+.crownIcon {
+  color: #d6ccff;
+  filter: drop-shadow(0 0 8px rgba(201, 182, 255, 0.7));
+  animation: crownFloat 2s ease-in-out infinite;
+}
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
