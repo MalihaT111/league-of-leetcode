@@ -14,7 +14,7 @@
   flex-direction: row;
   gap: clamp(24px, 4vw, 60px);
   justify-content: center;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
   max-width: 1200px;
   flex-wrap: nowrap;

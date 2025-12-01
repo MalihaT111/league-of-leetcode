@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Flex } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 import SettingsToggles from "./settingstoggle";
 import FilterTypesCard from "./filtertypes";
 import { ValidationResult } from "@/lib/hooks/useTopicValidation";
@@ -32,7 +32,12 @@ export default function SettingsContainer({
 }: SettingsContainerProps) {
   return (
     <>
-      <Flex gap={60} align="flex-start" justify="center">
+      <Flex
+        gap="clamp(32px, 5vw, 60px)"
+        align="stretch"
+        justify="center"
+        wrap="wrap"
+      >
         <SettingsToggles
           userId={userId}
           validation={validation}
@@ -46,29 +51,25 @@ export default function SettingsContainer({
         />
       </Flex>
 
-      {/* Soft block summary - shows at bottom */}
+      {/* Soft block summary */}
       {validation.blockType === "soft" && validation.errorMessage && (
         <div
           style={{
-            backgroundColor: "#3b2c0c",
-            border: "1px solid #ffa500",
-            borderRadius: "8px",
-            padding: "16px",
+            background: "rgba(255, 165, 0, 0.1)",
+            border: "1px solid rgba(255, 165, 0, 0.4)",
+            borderRadius: "10px",
+            padding: "16px 24px",
             maxWidth: "700px",
-            color: "#ffd699",
             textAlign: "center",
-            marginTop: "20px",
+            marginTop: "24px",
           }}
         >
-          <div
-            style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px" }}
-          >
+          <Text fw={600} size="md" c="#ffd699" mb={4}>
             ⚠️ {validation.invalidTopics.length} topic(s) incompatible
-          </div>
-          <div style={{ fontSize: "13px" }}>
-            You can still match with your {validation.validTopics.length} valid
-            topic(s).
-          </div>
+          </Text>
+          <Text size="sm" c="rgba(255, 214, 153, 0.9)">
+            You can still match with your {validation.validTopics.length} valid topic(s).
+          </Text>
         </div>
       )}
     </>
