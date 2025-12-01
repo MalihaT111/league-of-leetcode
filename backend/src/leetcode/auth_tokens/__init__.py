@@ -14,11 +14,16 @@ from .load_leetcode_tokens import (
     get_cookie_string,
     get_cookie_dict
 )
+from .auth_helper import authenticate, run_authentication
+from .leetcode_auth_viewer import authenticate_leetcode
 
 __all__ = [
     'load_tokens',
     'get_session_token',
     'get_csrf_token',
     'get_cookie_string',
-    'get_cookie_dict'
+    'get_cookie_dict',
+    'authenticate',
+    'run_authentication',
+    'authenticate_leetcode'
 ]

@@ -10,6 +10,7 @@ export interface MatchResultData {
     runtime: number; // in milliseconds
     memory: number; // in MB
     elo_change: number; // Winner's ELO gain (positive)
+    code: string;
   };
   loser: {
     id: number;
@@ -18,6 +19,7 @@ export interface MatchResultData {
     runtime: number; // in milliseconds
     memory: number; // in MB
     elo_change: number; // Loser's ELO loss (negative)
+    code: string;
   };
   problem: string; // problem slug
   match_duration: number; // in seconds

@@ -18,6 +18,7 @@ class UserSubmission(BaseModel):
     lang: str
     runtime: str
     memory: str
+    code: str
 
 class ProblemStats(BaseModel):
     total_solved: int

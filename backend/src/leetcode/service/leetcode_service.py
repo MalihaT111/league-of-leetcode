@@ -2,6 +2,9 @@ from fastapi import HTTPException
 import httpx
 import json
 import os
+import sys
+import asyncio
+import subprocess
 from typing import List, Optional
 from src.leetcode.service.client import LeetCodeGraphQLClient
 from src.leetcode.schemas import Problem, UserSubmission, ProblemStats, SyncResult
@@ -15,18 +18,29 @@ TOPIC_MAP_CACHE = None
 TOKENS_FILE = "backend/auth_tokens/leetcode_tokens.json"
 
 
-def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
+async def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
     """
     Load LeetCode authentication cookies from the saved tokens file.
+    If tokens don't exist, automatically runs authentication.
     Returns formatted cookie string: "csrftoken=<token>; LEETCODE_SESSION=<session>"
     """
     try:
+        # Check if tokens file exists
         if not os.path.exists(filepath):
-            raise FileNotFoundError(
-                f"Tokens file not found: {filepath}. "
-                "Run 'python backend/leetcode_auth_viewer.py' to authenticate."
-            )
+            print(f"⚠️  Tokens file not found: {filepath}")
+            print("🔄 Running automatic authentication...")
+            
+            # Import and run authentication
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+            from src.leetcode.auth_tokens.leetcode_auth_viewer import authenticate_leetcode
+            
+            # Run authentication
+            session_token, csrf_token = await authenticate_leetcode(force_refresh=False)
+            
+            print("✅ Authentication completed automatically!")
+            return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
         
+        # Load existing tokens
         with open(filepath, 'r') as f:
             tokens_data = json.load(f)
         
@@ -38,6 +52,8 @@ def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
         
         return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -110,14 +126,18 @@ class LeetCodeService:
         if not submissions:
             return None
         submission = submissions[0]
+        
+        submission_details = await LeetCodeService.get_submission_details(submission["id"])
+        
         return UserSubmission(
-            id=submission["id"],
-            title=submission["title"],
-            titleSlug=submission["titleSlug"],
-            timestamp=submission["timestamp"],
-            lang=submission["lang"],
-            runtime=submission["runtime"],
-            memory=submission["memory"]
+            id=submission_details["id"],
+            title=submission_details["title"],
+            titleSlug=submission_details["titleSlug"],
+            timestamp=submission_details["timestamp"],
+            lang=submission_details["lang"],
+            runtime=submission_details["runtime"],
+            memory=submission_details["memory"],
+            code=submission_details["code"]
         )
     
     @staticmethod
@@ -271,11 +291,11 @@ class LeetCodeService:
         Automatically loads authentication cookies from the saved tokens file.
         """
         # Load authentication cookies from file
-        auth_cookies = load_auth_cookies()
+        auth_cookies = await load_auth_cookies()
         
         # Query with authentication
         data = await LeetCodeGraphQLClient.query(
-            SUBMISSION_DETAILS, 
+            SUBMISSION_DETAILS_QUERY, 
             {"submissionId": submission_id}, 
             auth_cookies
         )

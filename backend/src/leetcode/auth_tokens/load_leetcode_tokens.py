@@ -26,13 +26,13 @@ def load_tokens(filepath: str = TOKENS_FILE) -> dict:
         with open(filepath, 'r') as f:
             tokens_data = json.load(f)
         
-        # Check if tokens are old (warn if older than 7 days)
+        # Check if tokens are old (warn if older than 1 day)
         retrieved_at = tokens_data.get('retrieved_at')
         if retrieved_at:
             retrieved_date = datetime.fromisoformat(retrieved_at)
             age = datetime.utcnow() - retrieved_date
             
-            if age > timedelta(days=7):
+            if age > timedelta(days=1):
                 print(f"⚠️  Warning: Tokens are {age.days} days old and may have expired.")
                 print("   Consider re-authenticating if you encounter errors.")
         
