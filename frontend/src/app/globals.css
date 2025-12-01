@@ -39,7 +39,7 @@ a {
 .title-gradient {
   font-family: 'Migra', serif !important;
   font-weight: 600 !important;
-  letter-spacing: 2px !important;
+  letter-spacing: clamp(1px, 0.3vw, 2px) !important;
   line-height: 1.05 !important;
   background: linear-gradient(
     90deg,
@@ -51,4 +51,18 @@ a {
   -webkit-background-clip: text !important;
   background-clip: text !important;
   color: transparent !important;
+}
+
+/* Responsive title sizes */
+@media (max-width: 768px) {
+  .title-gradient {
+    letter-spacing: 1px !important;
+  }
+}
+
+/* Consistent styling for leetcode problem/question names */
+.problem-name {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace !important;
+  color: rgba(220, 220, 255, 0.85) !important;
+  font-weight: 500 !important;
 }

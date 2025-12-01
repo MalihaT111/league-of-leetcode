@@ -16,6 +16,7 @@ class Stats(BaseModel):
 
 
 class MatchSummary(BaseModel):
+    match_id: int
     outcome: str
     rating_change: int
     question: str

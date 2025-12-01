@@ -2,7 +2,7 @@
 import Navbar from "@/components/all/Navbar";
 import { useEffect, useState } from "react";
 import { Flex, Stack, Title, Text, Button } from "@mantine/core";
-import { ProfileBox } from "@/components/profile/profilebox"; // ✅ use your existing square ProfileBox
+import { ProfileBox } from "@/components/profile/Box"; // ✅ use your existing square ProfileBox
 import { orbitron, montserrat } from "../fonts";
 
 export default function MatchFoundPage() {

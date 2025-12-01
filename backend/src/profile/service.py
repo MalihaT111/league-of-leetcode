@@ -54,6 +54,7 @@ async def get_profile_data(db: AsyncSession, user_id: int) -> Optional[Dict[str,
             rating_change = m.loser_elo_change if m.loser_elo_change is not None else -m.elo_change
         
         recent_matches.append({
+            "match_id": m.match_id,
             "outcome": "win" if m.winner_id == user_id else "loss",
             "rating_change": rating_change,
             "question": m.leetcode_problem,

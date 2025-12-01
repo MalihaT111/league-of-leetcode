@@ -1,0 +1,29 @@
+.page {
+  padding: 0 clamp(16px, 4vw, 40px);
+  padding-bottom: 60px;
+}
+
+.title {
+  margin-top: clamp(80px, 12vh, 100px);
+  margin-bottom: clamp(24px, 4vh, 40px);
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  gap: clamp(24px, 4vw, 60px);
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1200px;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 900px) {
+  .content {
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}

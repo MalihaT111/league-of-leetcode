@@ -1,19 +1,25 @@
 import { Flex, Title, Text, Button, Stack } from "@mantine/core";
 import Navbar from "../all/Navbar";
-import { montserrat, orbitron } from "@/app/fonts";
-import { ProfileBox } from "../profile/profilebox";
-import { UseMutationResult } from "@tanstack/react-query";
+import { orbitron } from "@/app/fonts";
+import { ProfileBox } from "../profile/Box";
 import { User } from "@/utils/auth";
+import styles from "./Match.module.css";
 
 interface MatchmakingProps {
-  user: User; 
+  user: User;
   seconds: number;
   handleLeaveQueue: () => Promise<void>;
   isLeaving?: boolean;
   connectionStatus?: string;
 }
 
-export default function Matchmaking({ user, seconds, handleLeaveQueue, isLeaving = false, connectionStatus }: MatchmakingProps) {
+export default function Matchmaking({
+  user,
+  seconds,
+  handleLeaveQueue,
+  isLeaving = false,
+  connectionStatus,
+}: MatchmakingProps) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
   const formatted = `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
@@ -30,33 +36,17 @@ export default function Matchmaking({ user, seconds, handleLeaveQueue, isLeaving
       gap="xl"
     >
       <Navbar />
-      <Title
-        className="title-gradient"
-        order={1}
-        style={{ fontSize: "4.5rem" }}
-      >
+      <Title order={1} className={`title-gradient ${styles.matchmakingTitle}`}>
         MATCHMAKING
       </Title>
 
-      {/* Profile Row */}
       <Flex align="center" justify="center" gap="xl">
         <Stack align="center" gap="xs">
           <ProfileBox username={user?.leetcode_username} rating={user?.user_elo} />
         </Stack>
 
         <Stack align="center" gap="xs">
-          <Text
-            style={{
-              fontSize: "30px",
-              fontStyle: "italic",
-              fontWeight: 700,
-              lineHeight: "1",
-              fontFamily: "var(--font-montserrat), sans-serif",
-            }}
-            size="sm"
-            c="dimmed"
-            ta="center"
-          >
+          <Text size="sm" c="dimmed" ta="center" className={styles.searchingText}>
             finding a worthy opponent...
           </Text>
           {connectionStatus && (
@@ -64,40 +54,24 @@ export default function Matchmaking({ user, seconds, handleLeaveQueue, isLeaving
               {connectionStatus}
             </Text>
           )}
-          <div
-            style={{
-              width: 60,
-              height: 60,
-              border: "4px solid white",
-              borderRadius: "50%",
-            }}
-          />
-          <Text
-            size="sm"
-            className={orbitron.className}
-            style={{
-              fontSize: "28px",
-              fontWeight: 700,
-              letterSpacing: "2px",
-            }}
-          >
+          <div className={styles.timerCircle} />
+          <Text size="sm" className={`${orbitron.className} ${styles.timerText}`}>
             {formatted}
           </Text>
         </Stack>
 
         <Stack align="center" gap="xs">
-          <ProfileBox /> {/* Unknown opponent */}
+          <ProfileBox />
         </Stack>
       </Flex>
 
-            {/* Cancel button */}
       <Button
         size="xl"
         radius="sm"
         variant="filled"
         color="yellow"
         mt="xl"
-        style={{ fontWeight: "bold" }}
+        className={styles.cancelButton}
         onClick={handleLeaveQueue}
         loading={isLeaving}
       >

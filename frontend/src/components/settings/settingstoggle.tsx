@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, Flex, Group, Text, Switch, Badge } from "@mantine/core";
-import ProfileHeader from "@/components/profile/profilehead";
+import ProfileHeader from "@/components/profile/Head";
 import { ValidationResult } from "@/lib/hooks/useTopicValidation";
 import { Settings } from "@/lib/api/queries/settings";
 

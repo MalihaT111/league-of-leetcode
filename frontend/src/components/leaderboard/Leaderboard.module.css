@@ -1,0 +1,61 @@
+.card {
+  background: rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 155, 255, 0.35);
+  box-shadow: 0 0 25px rgba(189, 155, 255, 0.12);
+  margin: 0 auto;
+}
+
+.title {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  background-color: transparent;
+  min-width: 600px;
+}
+
+.row {
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.row:hover {
+  transform: translateX(6px);
+  opacity: 0.9;
+}
+
+.cellCenter {
+  text-align: center;
+  width: 80px;
+}
+
+.cellCenterWide {
+  text-align: center;
+  width: 160px;
+}
+
+.cellCenterMedium {
+  text-align: center;
+  width: 120px;
+}
+
+.cellLeft {
+  text-align: left;
+}
+
+.avatar {
+  border: 1px solid rgba(189, 155, 255, 0.55);
+}
+
+.rankText {
+  letter-spacing: 0.5px;
+}
+
+.usernameText {
+  letter-spacing: 0.4px;
+}

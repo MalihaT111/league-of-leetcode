@@ -77,7 +77,7 @@ export default function SignInPage() {
               order={1}
               className="title-gradient"
               style={{
-                fontSize: "2.5rem",
+                fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
                 marginBottom: "8px",
               }}
             >
