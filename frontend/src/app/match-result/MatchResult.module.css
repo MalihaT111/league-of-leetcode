@@ -1,17 +1,43 @@
+/* Title */
 .title {
   font-size: clamp(2rem, 6vw, 3.5rem);
+  margin-bottom: -8px;
 }
 
+/* Unified content block */
+.contentBlock {
+  display: flex;
+  gap: 48px;
+  align-items: center;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+/* Glass performance panel */
 .performancePaper {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  width: 380px;
-  height: 260px;
+  background: rgba(10, 10, 20, 0.5);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(189, 155, 255, 0.3);
+  box-shadow: 0 0 30px rgba(189, 155, 255, 0.15);
+  width: 340px;
+  min-height: 220px;
+  animation: fadeInUp 0.5s ease 0.25s both;
 }
 
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Stat rows */
 .statRow {
-  background-color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
+  border: 1px solid rgba(189, 155, 255, 0.1);
+  transition: background 0.2s ease;
+}
+
+.statRow:hover {
+  background: rgba(189, 155, 255, 0.08);
 }
 
 .statValue {
@@ -20,34 +46,123 @@
 
 .statValueWinner {
   color: #06d6a0;
+  text-shadow: 0 0 8px rgba(6, 214, 160, 0.6);
 }
 
 .statValueLoser {
   color: #ff6b6b;
+  text-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
 }
 
 .statValueMemory {
   color: #ffd166;
+  text-shadow: 0 0 6px rgba(255, 209, 102, 0.5);
 }
 
+/* N/A shimmer effect */
 .statValueNA {
-  color: #888888;
+  color: rgba(220, 220, 255, 0.35);
+  animation: shimmerNA 2s ease-in-out infinite;
 }
 
+@keyframes shimmerNA {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.55; }
+}
+
+/* Problem and duration */
 .problemTitle {
-  color: #ffd166;
+  color: rgba(189, 155, 255, 0.9);
 }
 
 .duration {
   color: #06d6a0;
+  text-shadow: 0 0 6px rgba(6, 214, 160, 0.4);
 }
 
+/* ELO changes with animated glow */
 .eloWinner {
   color: #06d6a0;
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(6, 214, 160, 0.6);
+  animation: eloSlideIn 0.7s ease 0.6s both;
 }
 
 .eloLoser {
   color: #ff6b6b;
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+  animation: eloSlideIn 0.7s ease 0.7s both;
+}
+
+@keyframes eloSlideIn {
+  0% { opacity: 0; transform: translateX(-15px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Glass buttons - premium */
+.glassButton {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(189, 155, 255, 0.4) !important;
+  color: #d8c8ff !important;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  animation: fadeInUp 0.5s ease 0.5s both;
+}
+
+.glassButton:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(189, 155, 255, 0.7) !important;
+  box-shadow: 0 0 20px rgba(189, 155, 255, 0.25);
+  transform: scale(1.03);
+}
+
+.glassButtonPrimary {
+  background: linear-gradient(135deg, rgba(189, 155, 255, 0.35), rgba(140, 120, 200, 0.35)) !important;
+  border: 1px solid rgba(189, 155, 255, 0.55) !important;
+  color: white !important;
+  animation: fadeInUp 0.5s ease 0.45s both;
+}
+
+.glassButtonPrimary:hover {
+  background: linear-gradient(135deg, rgba(189, 155, 255, 0.5), rgba(140, 120, 200, 0.5)) !important;
+  box-shadow: 0 0 25px rgba(189, 155, 255, 0.35);
+  transform: scale(1.03);
+}
+
+/* Performance header */
+.performanceHeader {
+  color: rgba(220, 220, 255, 0.6);
+  animation: fadeInUp 0.5s ease 0.15s both;
+}
+
+/* Player cards column */
+.playerColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Info section - tighter spacing */
+.infoSection {
+  animation: fadeInUp 0.5s ease 0.35s both;
+}
+
+/* Match ID */
+.matchId {
+  color: rgba(220, 220, 255, 0.35);
+  font-size: 11px;
+  animation: fadeInUp 0.5s ease 0.6s both;
+}
+
+/* Stats panel header */
+.statsHeader {
+  color: rgba(189, 155, 255, 0.8);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
 }

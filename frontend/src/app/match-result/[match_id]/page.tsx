@@ -12,10 +12,41 @@ import {
   Alert,
   Divider,
 } from "@mantine/core";
-import { PlayerResult } from "@/components/playerresult";
+import { Space_Grotesk } from "next/font/google";
+import { PlayerResult } from "@/components/match/Result";
 import { useMatchResults } from "@/lib/api/queries";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../MatchResult.module.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+// Animated ELO counter hook
+function useAnimatedNumber(target: number, duration: number = 700, delay: number = 600) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const startTime = Date.now();
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(target * eased));
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [target, duration, delay]);
+
+  return value;
+}
 
 export default function MatchResultPage() {
   const params = useParams();
@@ -24,15 +55,28 @@ export default function MatchResultPage() {
   const { data, isLoading, isError, error } = useMatchResults(matchId);
   const [selectedPlayer, setSelectedPlayer] = useState<"winner" | "loser">("winner");
 
+  // Get actual ELO values for animation
+  const winnerElo = data?.winner?.elo_change || data?.elo_change || 0;
+  const loserElo = data?.loser?.elo_change || -(data?.elo_change || 0);
+  
+  const animatedWinnerElo = useAnimatedNumber(winnerElo, 700, 600);
+  const animatedLoserElo = useAnimatedNumber(Math.abs(loserElo), 700, 700);
+
   if (isNaN(matchId)) {
     return <Alert color="red">Invalid match ID.</Alert>;
   }
 
   if (isLoading) {
     return (
-      <Flex h="100vh" align="center" justify="center" bg="#1a1a1a" c="white">
+      <Flex
+        h="100vh"
+        align="center"
+        justify="center"
+        className={spaceGrotesk.className}
+        style={{ background: "#0d0d0f", color: "rgba(220, 220, 255, 1)" }}
+      >
         <Stack align="center">
-          <Loader size="lg" />
+          <Loader size="lg" color="violet" />
           <Text>Loading match results...</Text>
         </Stack>
       </Flex>
@@ -46,14 +90,22 @@ export default function MatchResultPage() {
         : "Failed to load match results.";
 
     return (
-      <Flex h="100vh" align="center" justify="center" bg="#1a1a1a" c="white">
-        <Paper bg="dark.6" p="xl" radius="md">
+      <Flex
+        h="100vh"
+        align="center"
+        justify="center"
+        className={spaceGrotesk.className}
+        style={{ background: "#0d0d0f", color: "rgba(220, 220, 255, 1)" }}
+      >
+        <Paper p="xl" radius="md" className={styles.performancePaper}>
           <Alert color="red" title="Error" mb="md">
             {message}
           </Alert>
           <Group justify="center">
-            <Button onClick={() => router.push("/dashboard")}>Dashboard</Button>
-            <Button variant="outline" onClick={() => router.back()}>
+            <Button className={styles.glassButtonPrimary} onClick={() => router.push("/home")}>
+              Home
+            </Button>
+            <Button className={styles.glassButton} onClick={() => router.back()}>
               Go Back
             </Button>
           </Group>
@@ -64,7 +116,13 @@ export default function MatchResultPage() {
 
   if (!data) {
     return (
-      <Flex h="100vh" align="center" justify="center" bg="#1a1a1a" c="white">
+      <Flex
+        h="100vh"
+        align="center"
+        justify="center"
+        className={spaceGrotesk.className}
+        style={{ background: "#0d0d0f", color: "rgba(220, 220, 255, 1)" }}
+      >
         <Text>No match data found.</Text>
       </Flex>
     );
@@ -88,13 +146,13 @@ export default function MatchResultPage() {
       username: data.winner?.username || "Winner",
       runtime: data.winner?.runtime || 0,
       memory: data.winner?.memory || 0,
-      elo_change: data.winner?.elo_change || data.elo_change || 0,
+      elo_change: winnerElo,
     },
     loser: {
       username: data.loser?.username || "Loser",
       runtime: data.loser?.runtime || 0,
       memory: data.loser?.memory || 0,
-      elo_change: data.loser?.elo_change || -data.elo_change || 0,
+      elo_change: loserElo,
     },
   };
 
@@ -104,14 +162,12 @@ export default function MatchResultPage() {
         result.winner.runtime === -1 ? "N/A" : `${result.winner.runtime} ms`,
       memoryUsage:
         result.winner.memory === -1 ? "N/A" : `${result.winner.memory} MB`,
-      description: "Winner's Stats:",
     },
     loser: {
       executionTime:
         result.loser.runtime === -1 ? "N/A" : `${result.loser.runtime} ms`,
       memoryUsage:
         result.loser.memory === -1 ? "N/A" : `${result.loser.memory} MB`,
-      description: "Loser's Stats:",
     },
   };
 
@@ -125,63 +181,65 @@ export default function MatchResultPage() {
     <Flex
       h="100vh"
       w="100%"
-      bg="#1a1a1a"
-      c="white"
       align="center"
       justify="center"
       direction="column"
-      gap="xl"
+      gap={24}
       p="xl"
+      className={spaceGrotesk.className}
+      style={{ background: "#0d0d0f", color: "rgba(220, 220, 255, 1)" }}
     >
       <Title order={1} className={`title-gradient ${styles.title}`}>
         RESULTS
       </Title>
 
-      <Flex gap="6rem" align="flex-start" justify="center">
+      {/* Unified content block */}
+      <div className={styles.contentBlock}>
+        {/* Left: Stats Panel */}
         <Stack gap="sm">
-          <Text fw={700} size="lg" tt="uppercase" c="dimmed">
+          <Text fw={600} size="sm" tt="uppercase" className={styles.performanceHeader}>
             {selectedPlayer === "winner"
               ? `${result.winner.username}'s Performance`
               : `${result.loser.username}'s Performance`}
           </Text>
-          <Paper shadow="lg" radius="md" p="lg" className={styles.performancePaper}>
-            <Stack gap="sm" h="100%" justify="space-between">
-              <Stack gap="xs">
-                <Text size="lg" fw={600}>
-                  {performanceData[selectedPlayer].description}
+          <Paper radius="md" p="lg" className={styles.performancePaper}>
+            <Stack gap="md">
+              <Text size="xs" tt="uppercase" className={styles.statsHeader}>
+                {selectedPlayer === "winner" ? "Winner's Stats" : "Loser's Stats"}
+              </Text>
+              
+              <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
+                <Text size="sm" c="rgba(220, 220, 255, 0.6)">
+                  Runtime
                 </Text>
-                <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
-                  <Text size="sm" c="dimmed">
-                    Runtime:
-                  </Text>
-                  <Text
-                    size="lg"
-                    fw={700}
-                    className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].executionTime, "runtime")}`}
-                  >
-                    {performanceData[selectedPlayer].executionTime}
-                  </Text>
-                </Flex>
+                <Text
+                  size="lg"
+                  fw={700}
+                  className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].executionTime, "runtime")}`}
+                >
+                  {performanceData[selectedPlayer].executionTime}
+                </Text>
+              </Flex>
 
-                <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
-                  <Text size="sm" c="dimmed">
-                    Memory:
-                  </Text>
-                  <Text
-                    size="lg"
-                    fw={700}
-                    className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].memoryUsage, "memory")}`}
-                  >
-                    {performanceData[selectedPlayer].memoryUsage}
-                  </Text>
-                </Flex>
-              </Stack>
+              <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
+                <Text size="sm" c="rgba(220, 220, 255, 0.6)">
+                  Memory
+                </Text>
+                <Text
+                  size="lg"
+                  fw={700}
+                  className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].memoryUsage, "memory")}`}
+                >
+                  {performanceData[selectedPlayer].memoryUsage}
+                </Text>
+              </Flex>
             </Stack>
           </Paper>
         </Stack>
 
-        <Stack gap="lg">
-          <Stack>
+        {/* Right: Player Cards + Info */}
+        <Stack gap="md">
+          <div className={styles.playerColumn}>
             <PlayerResult
               name={result.winner.username}
               tag="W"
@@ -195,48 +253,49 @@ export default function MatchResultPage() {
               active={selectedPlayer === "loser"}
               onClick={() => setSelectedPlayer("loser")}
             />
-          </Stack>
+          </div>
 
-          <Divider my="sm" color="gray.7" />
+          <Divider color="rgba(189, 155, 255, 0.15)" />
 
-          <Stack gap="xs">
-            <Text>
+          <Stack gap={6} className={styles.infoSection}>
+            <Text size="sm" c="rgba(220, 220, 255, 0.85)">
               <b>Problem:</b>{" "}
-              <span className="problem-name">{result.problem.title}</span>
+              <span className={styles.problemTitle}>{result.problem.title}</span>
             </Text>
-            <Text>
+            <Text size="sm" c="rgba(220, 220, 255, 0.85)">
               <b>Duration:</b>{" "}
               <span className={styles.duration}>{result.duration}</span>
             </Text>
-            <Text>
+            <Text size="sm" c="rgba(220, 220, 255, 0.85)">
               <b>Winner ELO:</b>{" "}
-              <span className={styles.eloWinner}>+{result.winner.elo_change}</span>
+              <span className={styles.eloWinner}>+{animatedWinnerElo}</span>
             </Text>
-            <Text>
+            <Text size="sm" c="rgba(220, 220, 255, 0.85)">
               <b>Loser ELO:</b>{" "}
-              <span className={styles.eloLoser}>{result.loser.elo_change}</span>
+              <span className={styles.eloLoser}>-{animatedLoserElo}</span>
             </Text>
           </Stack>
         </Stack>
-      </Flex>
+      </div>
 
-      <Group mt="xl" gap="lg">
-        <Button onClick={() => router.push("/match")}>New Game</Button>
+      <Group mt="sm" gap="md">
+        <Button className={styles.glassButtonPrimary} onClick={() => router.push("/match")}>
+          New Game
+        </Button>
         <Button
-          variant="light"
-          color="blue"
+          className={styles.glassButton}
           component="a"
           href={`https://leetcode.com/problems/${result.problem.slug}/`}
           target="_blank"
         >
           View Problem
         </Button>
-        <Button variant="outline" onClick={() => router.push("/home")}>
+        <Button className={styles.glassButton} onClick={() => router.push("/home")}>
           Home
         </Button>
       </Group>
 
-      <Text size="xs" c="dimmed" mt="md">
+      <Text className={styles.matchId}>
         Match ID: {matchId}
       </Text>
     </Flex>

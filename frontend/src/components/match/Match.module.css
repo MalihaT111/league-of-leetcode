@@ -1,39 +1,185 @@
-/* Matchmaking.tsx styles */
+/* ===== MATCHMAKING.TSX STYLES ===== */
+
+/* Cinematic title */
 .matchmakingTitle {
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-size: clamp(3rem, 8vw, 5rem);
 }
 
+@keyframes punchIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Searching text with ambient shimmer */
 .searchingText {
-  font-size: 30px;
+  font-size: 1.1rem;
   font-style: italic;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1;
-  font-family: var(--font-montserrat), sans-serif;
+  color: rgba(220, 220, 255, 1);
+  animation: shimmer 3s ease-in-out infinite;
 }
 
+@keyframes shimmer {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* Glassmorphic player cards with staggered fade */
+.playerCard {
+  width: 200px;
+  min-height: 220px;
+  padding: 20px;
+  background: rgba(20, 20, 30, 0.55);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 22px rgba(189, 155, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  opacity: 0;
+  animation: cardFade 0.7s ease forwards;
+}
+
+.playerCard:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.playerCard:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes cardFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Opponent glowing placeholder */
+.opponentGlow {
+  animation: cardFade 0.7s ease forwards, pulseGlow 2.2s ease-in-out infinite;
+  animation-delay: 0.3s, 0s;
+  will-change: box-shadow;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(189, 155, 255, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(189, 155, 255, 0.5); }
+}
+
+/* Hologram VS text */
+.vsHolo {
+  font-size: 46px;
+  font-weight: 800;
+  color: #d6ccff;
+  text-shadow:
+    0 0 12px rgba(189, 155, 255, 0.7),
+    0 0 30px rgba(189, 155, 255, 0.4);
+  animation: vsPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes vsPulse {
+  0%, 100% {
+    opacity: 0.7;
+    text-shadow:
+      0 0 12px rgba(189, 155, 255, 0.7),
+      0 0 30px rgba(189, 155, 255, 0.4);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 20px rgba(189, 155, 255, 1),
+      0 0 50px rgba(189, 155, 255, 0.7),
+      0 0 80px rgba(189, 155, 255, 0.4);
+  }
+}
+
+/* Spinning + pulsing timer circle */
 .timerCircle {
-  width: 60px;
-  height: 60px;
-  border: 4px solid white;
+  width: 70px;
+  height: 70px;
+  border: 3px solid rgba(189, 155, 255, 0.4);
+  border-top-color: rgba(189, 155, 255, 1);
   border-radius: 50%;
+  animation: spin 2s linear infinite, pulseSearch 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes pulseSearch {
+  0% { box-shadow: 0 0 8px rgba(189, 155, 255, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(189, 155, 255, 0.6); }
+  100% { box-shadow: 0 0 8px rgba(189, 155, 255, 0.3); }
 }
 
 .timerText {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: 2px;
+  color: rgba(220, 220, 255, 0.85);
 }
 
+/* Lavender glass cancel button */
 .cancelButton {
   font-weight: bold;
+  background: rgba(189, 155, 255, 0.15) !important;
+  border: 1px solid rgba(189, 155, 255, 0.35) !important;
+  color: #d6ccff !important;
+  backdrop-filter: blur(6px);
+  animation: fadeInUp 0.6s ease 0.4s both;
 }
 
-/* MatchFound.tsx styles */
+.cancelButton:hover {
+  background: rgba(189, 155, 255, 0.25) !important;
+  border-color: rgba(189, 155, 255, 0.5) !important;
+}
+
+/* Center stack animation */
+.centerStack {
+  min-width: 120px;
+  flex-shrink: 0;
+  animation: fadeInUp 0.6s ease 0.1s both;
+}
+
+/* Fade-in content animation */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== MATCHFOUND.TSX STYLES ===== */
+
 .matchFoundTitle {
   font-size: clamp(1.8rem, 5vw, 3rem);
+  animation: punchIn 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
 }
 
-.vsText {
+.matchFoundTitle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  animation: sweep 3s ease-in-out infinite;
+}
+
+.matchFoundVsText {
   font-size: 40px;
   font-weight: 700;
 }
@@ -45,12 +191,17 @@
 
 .problemLink {
   font-family: monospace;
+  color: rgba(220, 220, 255, 0.6);
 }
 
 .problemAnchor {
-  color: #1e88e5;
+  color: rgba(189, 155, 255, 0.9);
   text-decoration: underline;
   font-weight: bold;
+}
+
+.problemAnchor:hover {
+  color: rgba(189, 155, 255, 1);
 }
 
 .actionButton {
@@ -63,4 +214,33 @@
   font-weight: bold;
   background-color: #CCCCCC;
   color: black;
+}
+
+/* Match found player cards */
+.matchFoundCard {
+  padding: 16px;
+  background: rgba(20, 20, 30, 0.55);
+  border: 1px solid rgba(189, 155, 255, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 22px rgba(189, 155, 255, 0.18);
+  animation: fadeInUp 0.5s ease;
+}
+
+.matchFoundCardLeft {
+  animation: slideInLeft 0.6s ease;
+}
+
+.matchFoundCardRight {
+  animation: slideInRight 0.6s ease;
+}
+
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(40px); }
+  100% { opacity: 1; transform: translateX(0); }
 }

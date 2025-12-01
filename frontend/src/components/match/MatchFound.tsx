@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Flex, Title, Text, Button, Anchor } from "@mantine/core";
+import { Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/navigation";
 import Navbar from "../all/Navbar";
 import { ProfileBox } from "../profile/Box";
 import { orbitron } from "@/app/fonts";
 import { useSubmitSolution, useMatchStatus, useMatchRatingPreview } from "@/lib/api/queries/matchmaking";
 import styles from "./Match.module.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 interface MatchFoundProps {
   match: {
@@ -168,9 +174,9 @@ export default function MatchFound({
       direction="column"
       align="center"
       justify="center"
-      bg="dark"
-      c="white"
       gap="lg"
+      className={spaceGrotesk.className}
+      style={{ background: "#0d0d0f", color: "rgba(220, 220, 255, 0.85)" }}
     >
       <Navbar />
 
@@ -178,13 +184,22 @@ export default function MatchFound({
         MATCH FOUND
       </Title>
 
-      <Flex align="center" justify="center" gap="6rem">
-        <ProfileBox
-          username={user.leetcode_username || "User 1"}
-          rating={user.user_elo}
-        />
-        <Text className={`${orbitron.className} ${styles.vsText}`}>VS</Text>
-        <ProfileBox username={match.opponent} rating={match.opponent_elo} />
+      <Flex align="center" justify="center" gap="4rem">
+        {/* LEFT PLAYER */}
+        <div className={`${styles.matchFoundCard} ${styles.matchFoundCardLeft}`}>
+          <ProfileBox
+            username={user.leetcode_username || "User 1"}
+            rating={user.user_elo}
+          />
+        </div>
+
+        {/* VS */}
+        <Text className={`${styles.vsHolo} ${orbitron.className}`}>VS</Text>
+
+        {/* RIGHT PLAYER */}
+        <div className={`${styles.matchFoundCard} ${styles.matchFoundCardRight}`}>
+          <ProfileBox username={match.opponent} rating={match.opponent_elo} />
+        </div>
       </Flex>
 
       <Text
@@ -206,7 +221,7 @@ export default function MatchFound({
         </Anchor>
       </Text>
 
-      <Text size="sm" c="dimmed">
+      <Text size="sm" c="rgba(220, 220, 255, 0.6)">
         {ratingPreview
           ? (() => {
               const currentPlayer =

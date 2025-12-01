@@ -22,11 +22,11 @@ export function ProfileBox({ username, rating }: ProfileBoxProps) {
       </Box>
 
       {isUnknown ? (
-        <Text c="dimmed">???</Text>
+        <Text c="rgba(220, 220, 255, 1)">???</Text>
       ) : (
         <Stack gap={0} align="center">
-          <Text fw={700}>{username}</Text>
-          <Text fz="sm" c="dimmed">
+          <Text fw={700} c="rgba(220, 220, 255, 1)">{username}</Text>
+          <Text fz="sm" c="rgba(220, 220, 255, 1)">
             ({rating})
           </Text>
         </Stack>
