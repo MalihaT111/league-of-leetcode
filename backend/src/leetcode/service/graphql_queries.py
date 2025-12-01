@@ -82,7 +82,7 @@ query problemsetQuestionListV2 {
 }
 """
 
-SUBMISSION_DETAILS = """
+SUBMISSION_DETAILS_QUERY = """
 query submissionDetails($submissionId: Int!) {
   submissionDetails(submissionId: $submissionId) {
     runtime

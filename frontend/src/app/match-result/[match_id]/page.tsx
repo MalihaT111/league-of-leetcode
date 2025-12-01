@@ -147,6 +147,7 @@ export default function MatchResultPage() {
       runtime: data.winner?.runtime || 0,
       memory: data.winner?.memory || 0,
       elo_change: winnerElo,
+      code: data.winner?.code || "",
     },
     loser: {
       username: data.loser?.username || "Loser",

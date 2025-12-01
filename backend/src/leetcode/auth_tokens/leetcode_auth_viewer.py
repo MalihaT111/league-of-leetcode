@@ -210,7 +210,17 @@ async def get_auth_cookie():
 
 
 
-async def main(force_refresh: bool = False):
+async def authenticate_leetcode(force_refresh: bool = False) -> tuple[str, str]:
+    """
+    Authenticate with LeetCode and return tokens.
+    Can be called from any file without parameters.
+    
+    Returns:
+        tuple: (session_token, csrf_token)
+    
+    Raises:
+        RuntimeError: If authentication fails
+    """
     """
     Main function to run authentication and save tokens.
     
@@ -243,7 +253,7 @@ async def main(force_refresh: bool = False):
                 print(f"✅ Tokens are valid! Submission details retrieved:")
                 print(f"   Submission ID: {submission_id}")
                 print(f"   Data keys: {list(question.keys())}")
-                return
+                return existing_tokens['LEETCODE_SESSION'], existing_tokens['csrftoken']
             except Exception as e:
                 print(f"⚠️  Existing tokens failed: {e}")
                 print("   Re-authenticating with fresh tokens...")
@@ -283,6 +293,8 @@ async def main(force_refresh: bool = False):
         print(f"   Submission ID: {submission_id}")
         print(f"   Data keys: {list(question.keys())}")
         
+        return session_token, csrf_token
+        
     except Exception as e:
         print("\n" + "="*60)
         print("❌ Authentication failed!")
@@ -293,13 +305,14 @@ async def main(force_refresh: bool = False):
         print("2. Make sure you complete 2FA within the time limit")
         print("3. Check if GitHub is blocking automated logins")
         print("="*60)
+        raise RuntimeError(f"LeetCode authentication failed: {e}")
 
 
 if __name__ == "__main__":
     """
     Usage:
     1. Set GITHUB_USERNAME and GITHUB_PASSWORD in your .env file
-    2. Run this script: python backend/leetcode_auth_viewer.py
+    2. Run this script: python backend/src/leetcode/auth_tokens/leetcode_auth_viewer.py
     3. If 2FA is enabled on your GitHub account:
        - A browser window will open
        - Enter your 2FA code when prompted
@@ -307,8 +320,8 @@ if __name__ == "__main__":
     4. The script will output your LeetCode session tokens
     
     Options:
-    - python backend/leetcode_auth_viewer.py          # Normal mode (uses cached tokens if <24h old)
-    - python backend/leetcode_auth_viewer.py --force  # Force re-authentication
+    - python backend/src/leetcode/auth_tokens/leetcode_auth_viewer.py          # Normal mode (uses cached tokens if <24h old)
+    - python backend/src/leetcode/auth_tokens/leetcode_auth_viewer.py --force  # Force re-authentication
     
     Note: Keep the browser window open until authentication completes!
     """
@@ -317,5 +330,12 @@ if __name__ == "__main__":
     # Check for --force flag
     force_refresh = "--force" in sys.argv or "-f" in sys.argv
     
-    asyncio.run(main(force_refresh=force_refresh))
+    try:
+        session_token, csrf_token = asyncio.run(authenticate_leetcode(force_refresh=force_refresh))
+        print("\n" + "="*60)
+        print("✅ Authentication complete!")
+        print("="*60)
+    except Exception as e:
+        print(f"\n❌ Failed: {e}")
+        sys.exit(1)
 
