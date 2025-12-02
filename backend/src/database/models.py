@@ -3,9 +3,10 @@ Database models for the application.
 """
 from sqlalchemy.ext.mutable import MutableList
 from fastapi_users.db import SQLAlchemyBaseUserTable
-from sqlalchemy import Column, Integer, String, Boolean, Float, Text, JSON, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, Text, JSON, Enum, ForeignKey, DateTime
 from src.database.database import Base
 import enum
+from datetime import datetime
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
@@ -88,5 +89,19 @@ class MatchHistory(Base):
     loser_runtime = Column(Integer, nullable=False)
     winner_memory = Column(Float, nullable=False)
     loser_memory = Column(Float, nullable=False)
+
+
+class FriendMatchRequest(Base):
+    __tablename__ = "friend_match_requests"
+    
+    request_id = Column(Integer, primary_key=True, autoincrement=True)
+    sender_id = Column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
+    receiver_id = Column(Integer, ForeignKey("users.user_id"), nullable=False, index=True)
+    status = Column(Enum('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'EXPIRED'), 
+                   nullable=False, default='PENDING')
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)
+    responded_at = Column(DateTime, nullable=True)
+    match_id = Column(Integer, ForeignKey("match_history.match_id"), nullable=True)
     
 # backend/src/database/models.py
