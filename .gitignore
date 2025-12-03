@@ -5,4 +5,4 @@
 .env
 
 # LeetCode tokens (sensitive)
-backend/src/leetcode/auth_tokens/leetcode_tokens.json
+backend/src/leetcode/service/auth_tokens/leetcode_tokens.json

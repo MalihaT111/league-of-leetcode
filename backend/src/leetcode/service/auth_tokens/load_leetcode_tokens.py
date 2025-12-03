@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime, timedelta
 
-TOKENS_FILE = "backend/auth_tokens/leetcode_tokens.json"
+TOKENS_FILE = "backend/src/leetcode/service/auth_tokens/leetcode_tokens.json"
 
 
 def load_tokens(filepath: str = TOKENS_FILE) -> dict:
