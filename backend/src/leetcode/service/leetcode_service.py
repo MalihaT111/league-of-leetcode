@@ -43,10 +43,11 @@ async def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
             print("🔄 Running automatic authentication...")
 
             # Import and run authentication
-            from ..auth_tokens.leetcode_auth_viewer import authenticate_leetcode
+            from .auth_tokens.leetcode_auth_viewer import get_leetcode_tokens
+
 
             # Run authentication (no force refresh by default)
-            session_token, csrf_token = await authenticate_leetcode(force_refresh=False)
+            session_token, csrf_token = await get_leetcode_tokens(force_refresh=False)
 
             print("✅ Authentication completed automatically!")
             return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
@@ -143,20 +144,23 @@ class LeetCodeService:
         submissions = await LeetCodeService.get_user_submissions(username)
         if not submissions:
             return None
-
+            
         submission = submissions[0]
+        
         submission_details = await LeetCodeService.get_submission_details(
             submission["id"]
         )
-        print(submission_details)
+        
+        print(submission_details.keys())
+        
         return UserSubmission(
-            id=submission_details["id"],
-            title=submission_details["title"],
-            titleSlug=submission_details["titleSlug"],
-            timestamp=submission_details["timestamp"],
-            lang=submission_details["lang"],
-            runtime=submission_details["runtime"],
-            memory=submission_details["memory"],
+            id=submission["id"],
+            title=submission["title"],
+            titleSlug=submission["titleSlug"],
+            timestamp=submission["timestamp"],
+            lang=submission["lang"],
+            runtime=submission["runtime"],
+            memory=submission["memory"],
             code=submission_details["code"],
         )
 
