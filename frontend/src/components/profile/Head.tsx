@@ -1,12 +1,32 @@
 import React from "react";
-import { Avatar, Flex, Text } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 import { montserrat } from "@/app/fonts";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import ProfilePictureUpload from "./ProfilePictureUpload";
 import styles from "./Profile.module.css";
 
-export default function ProfileHeader({ username }: { username: string }) {
+interface ProfileHeaderProps {
+  username: string;
+  userId: number;
+  profilePictureUrl?: string;
+}
+
+export default function ProfileHeader({ 
+  username, 
+  userId, 
+  profilePictureUrl 
+}: ProfileHeaderProps) {
+  const { currentUserId } = useCurrentUser();
+  const isOwnProfile = currentUserId === userId;
+
   return (
     <Flex align="center" gap="sm" p="sm" className={styles.headerContainer}>
-      <Avatar size={40} radius="xl" className={styles.headerAvatar} />
+      <ProfilePictureUpload
+        currentPictureUrl={profilePictureUrl}
+        username={username}
+        userId={userId}
+        isOwnProfile={isOwnProfile}
+      />
 
       <Text className={`${montserrat.className} ${styles.headerUsername}`} c="white">
         {username}

@@ -42,6 +42,7 @@ mysqlclient==2.2.7
 package_name==0.1
 packaging==25.0
 passlib==1.7.4
+Pillow==10.4.0
 playwright==1.55.0
 pluggy==1.6.0
 propcache==0.3.2

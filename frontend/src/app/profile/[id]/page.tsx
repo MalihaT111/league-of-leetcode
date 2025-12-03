@@ -35,7 +35,7 @@ export default function ProfilePage() {
       </Title>
 
       <Flex className={styles.content}>
-        <ProfileStatsCard user={user} stats={stats} />
+        <ProfileStatsCard user={user} stats={stats} userId={userId} />
         <RecentSubmissionsTable matches={recent_matches} />
       </Flex>
     </Flex>

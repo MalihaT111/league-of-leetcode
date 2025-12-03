@@ -1,15 +1,16 @@
 from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, desc
+from sqlalchemy import select, or_, desc, update
 
 from src.database.models import User as UserModel
 from src.database.models import MatchHistory
+from src.profile.file_service import get_profile_picture_url
 
 
 async def get_profile_data(db: AsyncSession, user_id: int) -> Optional[Dict[str, Any]]:
-    # 1️⃣ Get user info (username + elo)
+    # 1️⃣ Get user info (username + elo + profile picture)
     user_result = await db.execute(
-        select(UserModel.leetcode_username, UserModel.user_elo)
+        select(UserModel.leetcode_username, UserModel.user_elo, UserModel.profile_picture_url)
         .where(UserModel.id == user_id)
     )
     user_row = user_result.one_or_none()
@@ -65,6 +66,7 @@ async def get_profile_data(db: AsyncSession, user_id: int) -> Optional[Dict[str,
         "user": {
             "username": user_row.leetcode_username,
             "elo": user_row.user_elo,
+            "profile_picture_url": get_profile_picture_url(user_row.profile_picture_url),
         },
         "stats": {
             "matches_won": matches_won,
@@ -73,3 +75,13 @@ async def get_profile_data(db: AsyncSession, user_id: int) -> Optional[Dict[str,
         },
         "recent_matches": recent_matches,
     }
+
+
+async def update_profile_picture(db: AsyncSession, user_id: int, file_path: Optional[str]) -> None:
+    """Update the profile picture URL for a user."""
+    await db.execute(
+        update(UserModel)
+        .where(UserModel.id == user_id)
+        .values(profile_picture_url=file_path)
+    )
+    await db.commit()

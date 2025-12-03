@@ -19,9 +19,11 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 export default function ProfileStatsCard({
   user,
   stats,
+  userId,
 }: {
   user: any;
   stats: any;
+  userId: number;
 }) {
   return (
     <Card radius="md" p="xl" className={styles.statsCard}>
@@ -34,7 +36,11 @@ export default function ProfileStatsCard({
           PLAYER STATS
         </Title>
 
-        <ProfileHeader username={user.username || `user_${user.id}`} />
+        <ProfileHeader 
+          username={user.username || `user_${userId}`}
+          userId={userId}
+          profilePictureUrl={user.profile_picture_url}
+        />
 
         <Stat label="ELO" value={user.elo ?? "—"} />
         <Stat label="MATCHES WON" value={stats.matches_won ?? 0} />

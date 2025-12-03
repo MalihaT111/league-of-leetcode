@@ -16,6 +16,7 @@ class UserBase(BaseModel):
 class UserProfile(BaseModel):
     username: str
     elo: int
+    profile_picture_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

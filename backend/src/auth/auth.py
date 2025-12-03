@@ -38,9 +38,7 @@ try:
         bcrypt__rounds=12
     )
     password_helper = PasswordHelper(password_context)
-    print("✅ Bcrypt configured successfully")
 except Exception as e:
-    print(f"❌ Bcrypt configuration error: {e}")
     # Fallback to a simpler configuration
     password_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
     password_helper = PasswordHelper(password_context)
