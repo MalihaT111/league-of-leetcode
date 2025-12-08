@@ -213,7 +213,7 @@ export default function MatchResultPage() {
               : `${result.loser.username}'s Performance`}
           </Text>
           <Paper radius="md" p="lg" className={styles.performancePaper}>
-            <Stack gap="md">
+            <Stack gap="md" mih={"270"}>
               <Text size="xs" tt="uppercase" className={styles.statsHeader}>
                 {
                   resultsBox === "code"
