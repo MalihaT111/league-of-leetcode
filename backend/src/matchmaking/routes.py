@@ -160,7 +160,7 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
     if not winner or not loser:
         raise HTTPException(status_code=404, detail="Player data not found")
     
-    # Get winner's recent submission for runtime and memory data
+    # Get winner's recent submission for runtime, memory, and code data
     from ..leetcode.service.leetcode_service import LeetCodeService
     try:
         if winner.leetcode_username:
@@ -177,16 +177,22 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
                     winner_memory = float(recent_submission.memory.replace(" MB", "").replace("MB", "")) if recent_submission.memory else -1.0
                 except (ValueError, AttributeError):
                     winner_memory = -1.0
+                
+                # Get the submitted code
+                winner_code = recent_submission.code if hasattr(recent_submission, 'code') else None
             else:
                 winner_runtime = -1
                 winner_memory = -1.0
+                winner_code = None
         else:
             winner_runtime = -1
             winner_memory = -1.0
+            winner_code = None
     except Exception as e:
         print(f"Error getting winner submission data: {e}")
         winner_runtime = -1
         winner_memory = -1.0
+        winner_code = None
     
     # Set match duration (fallback - WebSocket should handle this)
     match.match_seconds = 0  # Default for REST API submissions
@@ -219,11 +225,13 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
     match.winner_elo = winner.user_elo
     match.loser_elo = loser.user_elo
     
-    # Set runtime and memory data
+    # Set runtime, memory, and code data
     match.winner_runtime = winner_runtime
     match.loser_runtime = -1  # Loser gets -1 for runtime
     match.winner_memory = winner_memory
     match.loser_memory = -1.0  # Loser gets -1 for memory
+    match.winner_code = winner_code  # Store winner's code
+    match.loser_code = None  # Loser doesn't have valid code
     
     await db.commit()
     
@@ -321,11 +329,13 @@ async def resign_match(match_id: int, user_id: int, db: AsyncSession = Depends(g
     match.winner_elo = winner.user_elo
     match.loser_elo = loser.user_elo
     
-    # Set runtime and memory data for resignation (both get -1 since no valid submission)
+    # Set runtime, memory, and code data for resignation (both get -1 since no valid submission)
     match.winner_runtime = -1
     match.loser_runtime = -1
     match.winner_memory = -1.0
     match.loser_memory = -1.0
+    match.winner_code = None  # No code for resignation
+    match.loser_code = None  # No code for resignation
     
     await db.commit()
     
