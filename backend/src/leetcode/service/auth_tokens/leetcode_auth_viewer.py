@@ -93,7 +93,7 @@ class LeetCodeAuthenticator:
         self,
         tokens_file: Path = DEFAULT_TOKENS_FILE,
         max_age_hours: int = 24,
-        headless: bool = False,
+        headless: bool = True,
     ) -> None:
         self.tokens_file = tokens_file
         self.max_age = timedelta(hours=max_age_hours)
