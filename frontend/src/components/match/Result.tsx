@@ -29,10 +29,10 @@ export function PlayerResult({
 
   const innerClasses = [
     styles.inner,
-    isWinner
-      ? styles.innerWinner
-      : active
-        ? styles.innerActive
+    active
+      ? styles.innerActive
+      : isWinner
+        ? styles.innerWinner
         : styles.innerDefault,
   ].join(" ");
 
