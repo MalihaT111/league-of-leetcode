@@ -21,7 +21,11 @@ export interface MatchResultData {
     elo_change: number; // Loser's ELO loss (negative)
     code: string;
   };
-  problem: string; // problem slug
+  problem: {
+    slug: string
+    title: string;
+    url: string
+  }
   match_duration: number; // in seconds
   elo_change: number; // Keep for backward compatibility
 }
@@ -37,7 +41,7 @@ export const useMatchResults = (matchId: number) => {
 
 async function fetchMatchResults(matchId: number): Promise<MatchResultData> {
   const response = await fetch(
-    `http://127.0.0.1:8000/matchmaking/result/${matchId}`,
+    `http://127.0.0.1:8000/api/match-result/${matchId}`,
     {
       method: "GET",
     },
