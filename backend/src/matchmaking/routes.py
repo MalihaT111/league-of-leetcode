@@ -160,7 +160,7 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
     if not winner or not loser:
         raise HTTPException(status_code=404, detail="Player data not found")
     
-    # Get winner's recent submission for runtime and memory data
+    # Get winner's recent submission for runtime, memory, and code data
     from ..leetcode.service.leetcode_service import LeetCodeService
     try:
         if winner.leetcode_username:
@@ -177,16 +177,22 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
                     winner_memory = float(recent_submission.memory.replace(" MB", "").replace("MB", "")) if recent_submission.memory else -1.0
                 except (ValueError, AttributeError):
                     winner_memory = -1.0
+                
+                # Get the submitted code
+                winner_code = recent_submission.code if hasattr(recent_submission, 'code') else None
             else:
                 winner_runtime = -1
                 winner_memory = -1.0
+                winner_code = None
         else:
             winner_runtime = -1
             winner_memory = -1.0
+            winner_code = None
     except Exception as e:
         print(f"Error getting winner submission data: {e}")
         winner_runtime = -1
         winner_memory = -1.0
+        winner_code = None
     
     # Set match duration (fallback - WebSocket should handle this)
     match.match_seconds = 0  # Default for REST API submissions
@@ -219,11 +225,13 @@ async def submit_solution(match_id: int, user_id: int, db: AsyncSession = Depend
     match.winner_elo = winner.user_elo
     match.loser_elo = loser.user_elo
     
-    # Set runtime and memory data
+    # Set runtime, memory, and code data
     match.winner_runtime = winner_runtime
     match.loser_runtime = -1  # Loser gets -1 for runtime
     match.winner_memory = winner_memory
     match.loser_memory = -1.0  # Loser gets -1 for memory
+    match.winner_code = winner_code  # Store winner's code
+    match.loser_code = None  # Loser doesn't have valid code
     
     await db.commit()
     
@@ -321,11 +329,13 @@ async def resign_match(match_id: int, user_id: int, db: AsyncSession = Depends(g
     match.winner_elo = winner.user_elo
     match.loser_elo = loser.user_elo
     
-    # Set runtime and memory data for resignation (both get -1 since no valid submission)
+    # Set runtime, memory, and code data for resignation (both get -1 since no valid submission)
     match.winner_runtime = -1
     match.loser_runtime = -1
     match.winner_memory = -1.0
     match.loser_memory = -1.0
+    match.winner_code = None  # No code for resignation
+    match.loser_code = None  # No code for resignation
     
     await db.commit()
     
@@ -442,53 +452,4 @@ async def get_match_rating_preview(match_id: int, db: AsyncSession = Depends(get
             "rating_change_on_win": user2_preview["rating_change_on_win"],
             "rating_change_on_loss": user2_preview["rating_change_on_loss"]
         }
-    }
-
-@router.get("/result/{match_id}")
-async def get_match_result(match_id: int, db: AsyncSession = Depends(get_db)):
-    """Get the result of a completed match"""
-    
-    # Find the match
-    match_result = await db.execute(
-        select(MatchHistory).where(MatchHistory.match_id == match_id)
-    )
-    match = match_result.scalar_one_or_none()
-    
-    if not match:
-        raise HTTPException(status_code=404, detail="Match not found")
-    
-    if match.elo_change == 0:
-        raise HTTPException(status_code=400, detail="Match not completed yet")
-    
-    # Get winner and loser info
-    winner_result = await db.execute(select(User).where(User.id == match.winner_id))
-    winner = winner_result.scalar_one_or_none()
-    
-    loser_result = await db.execute(select(User).where(User.id == match.loser_id))
-    loser = loser_result.scalar_one_or_none()
-    
-    if not winner or not loser:
-        raise HTTPException(status_code=404, detail="Player data not found")
-    
-    return {
-        "match_id": match.match_id,
-        "winner": {
-            "id": winner.id,
-            "username": winner.leetcode_username or winner.email,
-            "elo": match.winner_elo,
-            "runtime": match.winner_runtime,
-            "memory": match.winner_memory,
-            "elo_change": match.winner_elo_change or match.elo_change  # Fallback for old matches
-        },
-        "loser": {
-            "id": loser.id,
-            "username": loser.leetcode_username or loser.email,
-            "elo": match.loser_elo,
-            "runtime": match.loser_runtime,
-            "memory": match.loser_memory,
-            "elo_change": match.loser_elo_change or -match.elo_change  # Fallback for old matches
-        },
-        "elo_change": match.elo_change,  # Keep for backward compatibility
-        "problem": match.leetcode_problem,
-        "match_duration": match.match_seconds
     }

@@ -88,5 +88,7 @@ class MatchHistory(Base):
     loser_runtime = Column(Integer, nullable=False)
     winner_memory = Column(Float, nullable=False)
     loser_memory = Column(Float, nullable=False)
+    winner_code = Column(Text, nullable=True)
+    loser_code = Column(Text, nullable=True)
     
 # backend/src/database/models.py

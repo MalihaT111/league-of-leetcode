@@ -288,7 +288,7 @@ class WebSocketManager:
         if problem:
             match.leetcode_problem = problem.slug
 
-        # Get runtime and memory data from the winner's submission
+        # Get runtime, memory, and code data from the winner's submission
         try:
             if recent_submission:
                 # Parse runtime (remove "ms" and convert to int)
@@ -302,13 +302,18 @@ class WebSocketManager:
                     winner_memory = float(recent_submission.memory.replace(" MB", "").replace("MB", "")) if recent_submission.memory else -1.0
                 except (ValueError, AttributeError):
                     winner_memory = -1.0
+                
+                # Get the submitted code
+                winner_code = recent_submission.code if hasattr(recent_submission, 'code') else None
             else:
                 winner_runtime = -1
                 winner_memory = -1.0
+                winner_code = None
         except Exception as e:
             print(f"Error parsing submission data: {e}")
             winner_runtime = -1
             winner_memory = -1.0
+            winner_code = None
 
         # Get user data and calculate ELO changes
         winner_result = await db.execute(select(User).where(User.id == winner_id))
@@ -351,11 +356,13 @@ class WebSocketManager:
             match.winner_elo = winner.user_elo
             match.loser_elo = loser.user_elo
 
-        # Set runtime and memory data
+        # Set runtime, memory, and code data
         match.winner_runtime = winner_runtime
         match.loser_runtime = -1  # Loser gets -1 for runtime
         match.winner_memory = winner_memory
         match.loser_memory = -1.0  # Loser gets -1 for memory
+        match.winner_code = winner_code  # Store winner's code
+        match.loser_code = None  # Loser doesn't have valid code
 
         await db.commit()
 
@@ -475,11 +482,13 @@ class WebSocketManager:
             match.winner_elo = winner.user_elo
             match.loser_elo = loser.user_elo
 
-        # Set runtime and memory data for resignation (both get -1 since no valid submission)
+        # Set runtime, memory, and code data for resignation (both get -1 since no valid submission)
         match.winner_runtime = -1
         match.loser_runtime = -1
         match.winner_memory = -1.0
         match.loser_memory = -1.0
+        match.winner_code = None  # No code for resignation
+        match.loser_code = None  # No code for resignation
 
         await db.commit()
 
