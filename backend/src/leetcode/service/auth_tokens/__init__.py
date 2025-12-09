@@ -20,5 +20,7 @@ __all__ = [
     'get_session_token',
     'get_csrf_token',
     'get_cookie_string',
-    'get_cookie_dict'
+    'get_cookie_dict',
+    'authenticate',
+    'run_authentication',
 ]

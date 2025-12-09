@@ -103,5 +103,7 @@ class FriendMatchRequest(Base):
     expires_at = Column(DateTime, nullable=False)
     responded_at = Column(DateTime, nullable=True)
     match_id = Column(Integer, ForeignKey("match_history.match_id"), nullable=True)
+    winner_code = Column(Text, nullable=True)
+    loser_code = Column(Text, nullable=True)
     
 # backend/src/database/models.py
