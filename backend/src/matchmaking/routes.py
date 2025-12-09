@@ -29,31 +29,10 @@ async def get_user_games_played(user_id: int, db: AsyncSession) -> int:
 
 @router.post("/queue/{user_id}", response_model=QueueResponse)
 async def join_queue(user_id: int, db: AsyncSession = Depends(get_db)):
-    from src.database.models import FriendMatchRequest
-    
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # Check for pending match requests
-    pending_request = await db.execute(
-        select(FriendMatchRequest).where(
-            and_(
-                or_(
-                    FriendMatchRequest.sender_id == user_id,
-                    FriendMatchRequest.receiver_id == user_id
-                ),
-                FriendMatchRequest.status == 'PENDING'
-            )
-        )
-    )
-    
-    if pending_request.scalar_one_or_none():
-        raise HTTPException(
-            status_code=400, 
-            detail="Cannot join queue while you have a pending friend match request. Please cancel or wait for response."
-        )
 
     print(f"🚀 User {user_id} ({user.email}) joining queue with ELO {user.user_elo}")
     
