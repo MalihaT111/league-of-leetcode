@@ -94,15 +94,44 @@ export default function MatchmakingPage() {
     validateSettings();
   }, [user]);
 
-  // Auto-join queue when user is loaded, WebSocket is connected, and settings are valid
+  // Check for existing active match before joining queue
+  const [hasCheckedExistingMatch, setHasCheckedExistingMatch] = useState(false);
+  const [hasActiveMatch, setHasActiveMatch] = useState(false);
+
   useEffect(() => {
-    if (user && isConnected && !isInQueue && !matchFound && settingsValid === true) {
+    const checkExistingMatch = async () => {
+      if (!user || hasCheckedExistingMatch) return;
+      
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/friends/${user.id}/match-state`);
+        const state = await response.json();
+        
+        if (state.in_active_match) {
+          console.log("🎮 User already has an active match, waiting for WebSocket notification");
+          setHasActiveMatch(true);
+        }
+        setHasCheckedExistingMatch(true);
+      } catch (error) {
+        console.error("Failed to check existing match:", error);
+        setHasCheckedExistingMatch(true);
+      }
+    };
+
+    checkExistingMatch();
+  }, [user, hasCheckedExistingMatch]);
+
+  // Auto-join queue when user is loaded, WebSocket is connected, and settings are valid
+  // BUT only if they don't already have an active match
+  useEffect(() => {
+    if (user && isConnected && !isInQueue && !matchFound && settingsValid === true && hasCheckedExistingMatch && !hasActiveMatch) {
       console.log("🚀 Auto-joining queue via WebSocket");
       joinQueue();
     } else if (settingsValid === false) {
       console.warn("⚠️ Cannot join queue: Invalid settings");
+    } else if (hasActiveMatch) {
+      console.log("⏳ Waiting for match_found message from WebSocket");
     }
-  }, [user, isConnected, isInQueue, matchFound, settingsValid, joinQueue]);
+  }, [user, isConnected, isInQueue, matchFound, settingsValid, joinQueue, hasCheckedExistingMatch, hasActiveMatch]);
 
   // Timer effect
   useEffect(() => {
