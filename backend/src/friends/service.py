@@ -191,10 +191,7 @@ async def cancel_friend_request(db: AsyncSession, sender_id: int, target_id: int
 
 
 async def remove_friend(db: AsyncSession, user_id: int, friend_id: int) -> dict:
-    """Remove a friend from both users' friends lists and cancel pending match requests"""
-    from sqlalchemy import update
-    from src.database.models import FriendMatchRequest
-    from datetime import datetime
+    """Remove a friend from both users' friends lists"""
     
     # Validate users exist
     user_result = await db.execute(select(User).where(User.id == user_id))
@@ -219,28 +216,6 @@ async def remove_friend(db: AsyncSession, user_id: int, friend_id: int) -> dict:
     
     if user_id in (friend_friends.current_friends or []):
         friend_friends.current_friends.remove(user_id)
-    
-    # Cancel any pending match requests between these users
-    now = datetime.utcnow()
-    await db.execute(
-        update(FriendMatchRequest)
-        .where(
-            and_(
-                or_(
-                    and_(
-                        FriendMatchRequest.sender_id == user_id,
-                        FriendMatchRequest.receiver_id == friend_id
-                    ),
-                    and_(
-                        FriendMatchRequest.sender_id == friend_id,
-                        FriendMatchRequest.receiver_id == user_id
-                    )
-                ),
-                FriendMatchRequest.status == 'PENDING'
-            )
-        )
-        .values(status='CANCELLED', responded_at=now)
-    )
     
     await db.commit()
     
