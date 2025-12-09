@@ -49,7 +49,8 @@ if not GITHUB_USERNAME or not GITHUB_PASSWORD:
         "GITHUB_USERNAME or GITHUB_PASSWORD is not set in the environment. "
         "Authentication will fail until you configure your .env file."
     )
-
+else:
+    print("USER+PASS: ", GITHUB_USERNAME, GITHUB_PASSWORD)
 # Where tokens will be stored
 DEFAULT_TOKENS_FILE = BACKEND_DIR / "src" / "leetcode" / "service" / "auth_tokens" / "leetcode_tokens.json"
 
@@ -93,7 +94,7 @@ class LeetCodeAuthenticator:
         self,
         tokens_file: Path = DEFAULT_TOKENS_FILE,
         max_age_hours: int = 24,
-        headless: bool = True,
+        headless: bool = False,
     ) -> None:
         self.tokens_file = tokens_file
         self.max_age = timedelta(hours=max_age_hours)

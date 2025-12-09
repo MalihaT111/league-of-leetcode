@@ -8,6 +8,12 @@ import {
   declineFriendRequest,
   cancelFriendRequest,
   removeFriend,
+  sendMatchRequest,
+  acceptMatchRequest,
+  rejectMatchRequest,
+  cancelMatchRequest,
+  getPendingMatchRequests,
+  getMatchState,
 } from "../../friends";
 
 export const useSearchUsers = (userId: number, query: string, enabled: boolean = false) => {
@@ -94,6 +100,78 @@ export const useRemoveFriend = () => {
       removeFriend(userId, friendId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["friendsList", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["matchRequests", variables.userId] });
+    },
+  });
+};
+
+// Match request hooks
+export const usePendingMatchRequests = (userId: number) => {
+  return useQuery({
+    queryKey: ["matchRequests", userId],
+    queryFn: () => getPendingMatchRequests(userId),
+    staleTime: 3000, // Cache for 3 seconds
+    refetchInterval: 5000, // Poll every 5 seconds
+  });
+};
+
+export const useMatchState = (userId: number) => {
+  return useQuery({
+    queryKey: ["matchState", userId],
+    queryFn: () => getMatchState(userId),
+    staleTime: 2000, // Cache for 2 seconds
+    refetchInterval: 5000, // Poll every 5 seconds
+  });
+};
+
+export const useSendMatchRequest = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ userId, friendId }: { userId: number; friendId: number }) =>
+      sendMatchRequest(userId, friendId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["matchRequests", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["matchState", variables.userId] });
+    },
+  });
+};
+
+export const useAcceptMatchRequest = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ requestId, userId }: { requestId: number; userId: number }) =>
+      acceptMatchRequest(requestId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["matchRequests", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["matchState", variables.userId] });
+    },
+  });
+};
+
+export const useRejectMatchRequest = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ requestId, userId }: { requestId: number; userId: number }) =>
+      rejectMatchRequest(requestId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["matchRequests", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["matchState", variables.userId] });
+    },
+  });
+};
+
+export const useCancelMatchRequest = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ requestId, userId }: { requestId: number; userId: number }) =>
+      cancelMatchRequest(requestId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["matchRequests", variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ["matchState", variables.userId] });
     },
   });
 };
