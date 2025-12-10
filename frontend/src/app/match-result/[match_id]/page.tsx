@@ -18,6 +18,7 @@ import { useMatchResults } from "@/lib/api/queries";
 import { useState, useEffect } from "react";
 import ResultCode from "@/components/match-results/ResultCode";
 import ResultStats from "@/components/match-results/ResultStats";
+import { usePostGameAchievements } from "@/hooks/usePostGameAchievements";
 import styles from "../MatchResult.module.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -56,6 +57,7 @@ export default function MatchResultPage() {
   const matchId = Number(params.match_id);
   const { data, isLoading, isError, error } = useMatchResults(matchId);
   const [selectedPlayer, setSelectedPlayer] = useState<"winner" | "loser">("winner");
+  const { checkForNewAchievements } = usePostGameAchievements();
 
   // Get actual ELO values for animation
   const winnerElo = data?.winner?.elo_change || data?.elo_change || 0;
@@ -66,6 +68,18 @@ export default function MatchResultPage() {
 
   const animatedWinnerElo = useAnimatedNumber(winnerElo, 700, 600);
   const animatedLoserElo = useAnimatedNumber(Math.abs(loserElo), 700, 700);
+
+  // Check for achievements when match data is loaded
+  useEffect(() => {
+    if (data && !isLoading && !isError) {
+      // Small delay to let the page render first
+      const timer = setTimeout(() => {
+        checkForNewAchievements();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [data, isLoading, isError, checkForNewAchievements]);
 
   if (isNaN(matchId)) {
     return <Alert color="red">Invalid match ID.</Alert>;

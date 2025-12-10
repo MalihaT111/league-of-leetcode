@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "./fonts.css";
 import { Space_Grotesk } from "next/font/google";
 import { montserrat, orbitron, geistSans, geistMono } from "./fonts";
@@ -42,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             fontFamilyMonospace: "var(--font-geist-mono), monospace",
           }}
         >
+          <Notifications />
           <ParticleBackground />
           <ReactQueryProvider>
             <InitialAppLoader> 
