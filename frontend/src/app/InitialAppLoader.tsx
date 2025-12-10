@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import LoadingScreen from "@/components/all/LoadingScreen";
 import { AuthService } from "@/utils/auth";
+import NotificationManager from "@/components/notifications/NotificationManager";
+import { usePendingMatchRequests } from "@/lib/api/queries/friends";
 
 // Routes that don't require authentication
 const PUBLIC_ROUTES = ["/signin", "/signup", "/verify-leetcode"];
@@ -13,6 +15,7 @@ export default function InitialAppLoader({ children }: { children: React.ReactNo
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -37,7 +40,8 @@ export default function InitialAppLoader({ children }: { children: React.ReactNo
         }
 
         // Verify token is valid
-        await AuthService.getCurrentUser();
+        const user = await AuthService.getCurrentUser();
+        setUserId(user.id);
         setIsAuthorized(true);
       } catch (error) {
         console.error("Auth check failed:", error);
@@ -59,5 +63,26 @@ export default function InitialAppLoader({ children }: { children: React.ReactNo
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {userId && <MatchNotificationWrapper userId={userId} />}
+    </>
+  );
+}
+
+// Separate component to handle the match request notifications
+function MatchNotificationWrapper({ userId }: { userId: number }) {
+  const { data: matchRequests } = usePendingMatchRequests(userId);
+  
+  if (!matchRequests?.received || matchRequests.received.length === 0) {
+    return null;
+  }
+
+  return (
+    <NotificationManager 
+      userId={userId} 
+      matchRequests={matchRequests.received} 
+    />
+  );
 }
