@@ -10,8 +10,7 @@ install: install-backend install-frontend
 # Install backend dependencies
 install-backend:
     @echo "📦 Installing backend dependencies..."
-    cd backend && python3 -m venv .venv
-    cd backend && .venv/bin/pip install -r requirements.txt
+    cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
     @echo "✅ Backend dependencies installed"
 
 # Install frontend dependencies
