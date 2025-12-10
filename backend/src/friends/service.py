@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from typing import List, Optional
 from src.database.models import User, Friends
 from src.friends.schemas import FriendResponse, FriendRequestResponse
+from src.profile.file_service import get_profile_picture_url
 
 
 async def get_or_create_friends_record(db: AsyncSession, user_id: int) -> Friends:
@@ -277,7 +278,8 @@ async def get_friends_list(db: AsyncSession, user_id: int) -> List[FriendRespons
             user_id=friend.id,
             username=friend.username,
             leetcode_username=friend.leetcode_username or "",
-            user_elo=friend.user_elo
+            user_elo=friend.user_elo,
+            profile_picture_url=get_profile_picture_url(friend.profile_picture_url)
         )
         for friend in friends
     ]
@@ -309,7 +311,8 @@ async def get_friend_requests(db: AsyncSession, user_id: int) -> dict:
                 user_id=u.id,
                 username=u.username,
                 leetcode_username=u.leetcode_username or "",
-                user_elo=u.user_elo
+                user_elo=u.user_elo,
+                profile_picture_url=get_profile_picture_url(u.profile_picture_url)
             )
             for u in sent_users
         ]
@@ -325,7 +328,8 @@ async def get_friend_requests(db: AsyncSession, user_id: int) -> dict:
                 user_id=u.id,
                 username=u.username,
                 leetcode_username=u.leetcode_username or "",
-                user_elo=u.user_elo
+                user_elo=u.user_elo,
+                profile_picture_url=get_profile_picture_url(u.profile_picture_url)
             )
             for u in received_users
         ]
@@ -356,7 +360,8 @@ async def search_users(db: AsyncSession, query: str, current_user_id: int) -> Li
             user_id=user.id,
             username=user.username,
             leetcode_username=user.leetcode_username or "",
-            user_elo=user.user_elo
+            user_elo=user.user_elo,
+            profile_picture_url=get_profile_picture_url(user.profile_picture_url)
         )
         for user in users
     ]

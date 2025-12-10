@@ -9,6 +9,7 @@ from ..database.models import User, MatchHistory
 from .manager import MatchmakingManager
 from .service import create_match_record
 from .elo_service import EloService
+from ..profile.file_service import get_profile_picture_url
 import time
 
 class WebSocketManager:
@@ -173,7 +174,8 @@ class WebSocketManager:
                 **match_data,
                 "opponent": {
                     "username": user2.leetcode_username or user2.email,
-                    "elo": user2.user_elo
+                    "elo": user2.user_elo,
+                    "profile_picture_url": get_profile_picture_url(user2.profile_picture_url)
                 }
             })
 
@@ -181,7 +183,8 @@ class WebSocketManager:
                 **match_data,
                 "opponent": {
                     "username": user1.leetcode_username or user1.email,
-                    "elo": user1.user_elo
+                    "elo": user1.user_elo,
+                    "profile_picture_url": get_profile_picture_url(user1.profile_picture_url)
                 }
             })
 

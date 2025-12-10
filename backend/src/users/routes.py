@@ -4,6 +4,7 @@ from sqlalchemy import desc, select
 from src.database.models import User
 from src.database.database import get_db
 from src.users import service, schemas
+from src.profile.file_service import get_profile_picture_url
 
 router = APIRouter()
 
@@ -43,7 +44,8 @@ async def get_leaderboard(db: AsyncSession = Depends(get_db)):
             User.id,
             User.leetcode_username,
             User.user_elo,
-            User.winstreak
+            User.winstreak,
+            User.profile_picture_url
         ).order_by(desc(User.user_elo))
         .limit(10)
     )
@@ -58,7 +60,8 @@ async def get_leaderboard(db: AsyncSession = Depends(get_db)):
             "id": user.id,
             "username": user.leetcode_username,
             "elo": user.user_elo,
-            "winstreak": user.winstreak
+            "winstreak": user.winstreak,
+            "profile_picture_url": get_profile_picture_url(user.profile_picture_url)
         }
         for rank, user in enumerate(users, start=1)
     ]

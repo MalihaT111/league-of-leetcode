@@ -63,6 +63,7 @@ async def root():
 # --- Authenticated Profile Endpoint ---
 @app.get("/me")
 async def get_profile(user: User = Depends(current_user)):
+    from src.profile.file_service import get_profile_picture_url
     return {
         "id": user.id,
         "email": user.email,
@@ -72,6 +73,7 @@ async def get_profile(user: User = Depends(current_user)):
         "is_active": user.is_active,
         "is_verified": user.is_verified,
         "is_superuser": user.is_superuser,
+        "profile_picture_url": get_profile_picture_url(user.profile_picture_url),
     }
 
 @app.on_event("startup")

@@ -1,12 +1,13 @@
-import { Box, Stack, Text } from "@mantine/core";
+import { Box, Stack, Text, Avatar } from "@mantine/core";
 import styles from "./Profile.module.css";
 
 interface ProfileBoxProps {
   username?: string;
   rating?: number;
+  profilePictureUrl?: string | null;
 }
 
-export function ProfileBox({ username, rating }: ProfileBoxProps) {
+export function ProfileBox({ username, rating, profilePictureUrl }: ProfileBoxProps) {
   const isUnknown = !username;
 
   return (
@@ -17,7 +18,14 @@ export function ProfileBox({ username, rating }: ProfileBoxProps) {
             ?
           </Text>
         ) : (
-          <Text fw={700} fz={32}></Text>
+          <Avatar
+            size={146}
+            radius={8}
+            src={profilePictureUrl || undefined}
+            className={styles.matchmakingAvatar}
+          >
+            {username?.charAt(0).toUpperCase()}
+          </Avatar>
         )}
       </Box>
 

@@ -7,6 +7,7 @@ interface FriendCardProps {
   username: string;
   leetcodeUsername: string;
   elo: number;
+  profilePictureUrl?: string | null;
   actions: React.ReactNode;
 }
 
@@ -14,13 +15,19 @@ export default function FriendCard({
   username,
   leetcodeUsername,
   elo,
+  profilePictureUrl,
   actions,
 }: FriendCardProps) {
   return (
     <div className={styles.friendCard}>
       <Group justify="space-between" wrap="nowrap">
         <Group gap="md" wrap="nowrap">
-          <Avatar radius="xl" size="md" className={styles.avatar}>
+          <Avatar 
+            radius="xl" 
+            size="md" 
+            src={profilePictureUrl || undefined}
+            className={styles.avatar}
+          >
             {username.charAt(0).toUpperCase()}
           </Avatar>
           <div>

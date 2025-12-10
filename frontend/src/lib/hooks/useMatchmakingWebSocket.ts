@@ -16,6 +16,7 @@ interface MatchFoundData {
   opponent: {
     username: string;
     elo: number;
+    profile_picture_url?: string | null;
   };
 }
 
