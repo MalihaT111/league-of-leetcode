@@ -27,6 +27,7 @@ type Player = {
   username: string;
   elo: number;
   winstreak: number;
+  profile_picture_url?: string | null;
 };
 
 export default function LeaderboardTable() {
@@ -73,7 +74,14 @@ export default function LeaderboardTable() {
 
       <td>
         <Group gap="sm">
-          <Avatar radius="xl" size="md" className={styles.avatar} />
+          <Avatar 
+            radius="xl" 
+            size="md" 
+            src={player.profile_picture_url || undefined}
+            className={styles.avatar}
+          >
+            {player.username?.charAt(0).toUpperCase()}
+          </Avatar>
           <Text fw={500} c="white" className={styles.usernameText}>
             {player.username}
           </Text>

@@ -12,6 +12,7 @@
   font-weight: 700;
   line-height: 1;
   font-family: var(--font-montserrat), sans-serif;
+  overflow: hidden;
 }
 
 /* Head.tsx styles */
@@ -29,6 +30,15 @@
   background: rgba(189, 155, 255, 0.3);
   border: 2px solid rgba(189, 155, 255, 0.6);
   flex-shrink: 0;
+}
+
+.matchmakingAvatar {
+  background: rgba(189, 155, 255, 0.3);
+  border: 2px solid rgba(189, 155, 255, 0.6);
+  font-size: 48px;
+  font-weight: 700;
+  width: 146px !important;
+  height: 146px !important;
 }
 
 /* Profile Picture Upload styles */

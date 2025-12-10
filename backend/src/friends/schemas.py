@@ -1,6 +1,6 @@
 # backend/src/friends/schemas.py
 from pydantic import BaseModel, ConfigDict
-from typing import List
+from typing import List, Optional
 
 
 class FriendRequest(BaseModel):
@@ -14,6 +14,7 @@ class FriendResponse(BaseModel):
     username: str
     leetcode_username: str
     user_elo: int
+    profile_picture_url: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -24,6 +25,7 @@ class FriendRequestResponse(BaseModel):
     username: str
     leetcode_username: str
     user_elo: int
+    profile_picture_url: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 

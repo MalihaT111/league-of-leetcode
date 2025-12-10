@@ -54,7 +54,11 @@ export default function Matchmaking({
       <Flex align="center" justify="center" gap="5rem" mt="lg">
         {/* LEFT PLAYER */}
         <div className={styles.playerCard}>
-          <ProfileBox username={user?.leetcode_username} rating={user?.user_elo} />
+          <ProfileBox 
+            username={user?.leetcode_username} 
+            rating={user?.user_elo} 
+            profilePictureUrl={user?.profile_picture_url}
+          />
         </div>
 
         {/* CENTER - VS + TIMER */}

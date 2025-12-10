@@ -12,6 +12,7 @@ export interface User {
   is_active: boolean;
   is_verified: boolean;
   is_superuser: boolean;
+  profile_picture_url?: string | null;
 }
 
 export interface RegisterData {

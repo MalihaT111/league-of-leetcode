@@ -120,6 +120,7 @@ export default function FriendsPage() {
                     username={friend.username}
                     leetcodeUsername={friend.leetcode_username}
                     elo={friend.user_elo}
+                    profilePictureUrl={friend.profile_picture_url}
                     actions={
                       <ActionButton
                         variant="remove"
@@ -160,6 +161,7 @@ export default function FriendsPage() {
                           username={request.username}
                           leetcodeUsername={request.leetcode_username}
                           elo={request.user_elo}
+                          profilePictureUrl={request.profile_picture_url}
                           actions={
                             <>
                               <ActionButton
@@ -199,6 +201,7 @@ export default function FriendsPage() {
                           username={request.username}
                           leetcodeUsername={request.leetcode_username}
                           elo={request.user_elo}
+                          profilePictureUrl={request.profile_picture_url}
                           actions={
                             <>
                               <PendingBadge />
@@ -248,6 +251,7 @@ export default function FriendsPage() {
                     username={user.username}
                     leetcodeUsername={user.leetcode_username}
                     elo={user.user_elo}
+                    profilePictureUrl={user.profile_picture_url}
                     actions={
                       <ActionButton
                         variant="add"
