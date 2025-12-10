@@ -45,9 +45,10 @@ export default function FriendCard({
 }
 
 interface ActionButtonProps {
-  variant: "add" | "accept" | "remove" | "cancel";
+  variant: "add" | "accept" | "remove" | "cancel" | "challenge";
   onClick: () => void;
   loading?: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -55,6 +56,7 @@ export function ActionButton({
   variant,
   onClick,
   loading,
+  disabled,
   children,
 }: ActionButtonProps) {
   const variantClass = {
@@ -62,13 +64,14 @@ export function ActionButton({
     accept: styles.acceptButton,
     remove: styles.removeButton,
     cancel: styles.removeButton,
+    challenge: styles.challengeButton,
   }[variant];
 
   return (
     <button
       className={`${styles.actionButton} ${variantClass}`}
       onClick={onClick}
-      disabled={loading}
+      disabled={loading || disabled}
     >
       {loading ? <Loader size="xs" color="white" /> : children}
     </button>

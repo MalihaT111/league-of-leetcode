@@ -13,6 +13,16 @@ from ..profile.file_service import get_profile_picture_url
 import time
 
 class WebSocketManager:
+    """
+    WebSocket manager for handling real-time matchmaking and game events.
+    
+    Features:
+    - Real-time matchmaking queue management
+    - Match creation and timer management
+    - Solution submission and validation
+    - Match resignation handling
+    - Achievement tracking integration
+    """
     def __init__(self):
         # Store active connections by user_id
         self.active_connections: Dict[int, WebSocket] = {}
@@ -291,7 +301,7 @@ class WebSocketManager:
         if problem:
             match.leetcode_problem = problem.slug
 
-        # Get runtime and memory data from the winner's submission
+        # Get runtime, memory, and code data from the winner's submission
         try:
             if recent_submission:
                 # Parse runtime (remove "ms" and convert to int)
@@ -305,13 +315,18 @@ class WebSocketManager:
                     winner_memory = float(recent_submission.memory.replace(" MB", "").replace("MB", "")) if recent_submission.memory else -1.0
                 except (ValueError, AttributeError):
                     winner_memory = -1.0
+                
+                # Get the submitted code
+                winner_code = recent_submission.code if hasattr(recent_submission, 'code') else None
             else:
                 winner_runtime = -1
                 winner_memory = -1.0
+                winner_code = None
         except Exception as e:
             print(f"Error parsing submission data: {e}")
             winner_runtime = -1
             winner_memory = -1.0
+            winner_code = None
 
         # Get user data and calculate ELO changes
         winner_result = await db.execute(select(User).where(User.id == winner_id))
@@ -353,31 +368,48 @@ class WebSocketManager:
             loser.user_elo += loser_elo_change  # This will be negative
             match.winner_elo = winner.user_elo
             match.loser_elo = loser.user_elo
+            
+            
+            
+            
 
-        # Set runtime and memory data
+        # Set runtime, memory, and code data
         match.winner_runtime = winner_runtime
         match.loser_runtime = -1  # Loser gets -1 for runtime
         match.winner_memory = winner_memory
         match.loser_memory = -1.0  # Loser gets -1 for memory
+        match.winner_code = winner_code  # Store winner's code
+        match.loser_code = None  # Loser doesn't have valid code
 
         await db.commit()
 
         # Stop the timer
         self.stop_match_timer(match_id)
 
+        # Check achievements for both players
+        from ..achievements.achievements import AchievementTracker
+        
+        # Check achievements for winner
+        winner_achievements = await AchievementTracker.check_achievements(winner_id, db, "match_completed")
+        
+        # Check achievements for loser (they still played a game)
+        loser_achievements = await AchievementTracker.check_achievements(loser_id, db, "match_completed")
+
         # Notify both players
         await self.send_to_user(winner_id, {
             "type": "match_completed",
             "result": "won",
             "match_id": match_id,
-            "elo_change": f"+{winner_elo_change}"
+            "elo_change": f"+{winner_elo_change}",
+            "achievements_unlocked": winner_achievements
         })
 
         await self.send_to_user(loser_id, {
             "type": "match_completed", 
             "result": "lost",
             "match_id": match_id,
-            "elo_change": f"{loser_elo_change}"  # Already negative
+            "elo_change": f"{loser_elo_change}",  # Already negative
+            "achievements_unlocked": loser_achievements
         })
 
         print(f"🏆 Match {match_id} completed. Winner: {winner_id}, Loser: {loser_id}")
@@ -478,13 +510,24 @@ class WebSocketManager:
             match.winner_elo = winner.user_elo
             match.loser_elo = loser.user_elo
 
-        # Set runtime and memory data for resignation (both get -1 since no valid submission)
+        # Set runtime, memory, and code data for resignation (both get -1 since no valid submission)
         match.winner_runtime = -1
         match.loser_runtime = -1
         match.winner_memory = -1.0
         match.loser_memory = -1.0
+        match.winner_code = None  # No code for resignation
+        match.loser_code = None  # No code for resignation
 
         await db.commit()
+
+        # Check achievements for both players
+        from ..achievements.achievements import AchievementTracker
+        
+        # Check achievements for winner (they won by resignation)
+        winner_achievements = await AchievementTracker.check_achievements(winner_id, db, "match_completed")
+        
+        # Check achievements for loser (they still played a game)
+        loser_achievements = await AchievementTracker.check_achievements(loser_id, db, "match_completed")
 
         # Notify both players
         await self.send_to_user(winner_id, {
@@ -492,7 +535,8 @@ class WebSocketManager:
             "result": "won",
             "match_id": match_id,
             "elo_change": f"+{winner_elo_change}",
-            "reason": "opponent_resigned"
+            "reason": "opponent_resigned",
+            "achievements_unlocked": winner_achievements
         })
 
         await self.send_to_user(loser_id, {
@@ -500,7 +544,8 @@ class WebSocketManager:
             "result": "lost",
             "match_id": match_id,
             "elo_change": f"{loser_elo_change}",  # Already negative
-            "reason": "resigned"
+            "reason": "resigned",
+            "achievements_unlocked": loser_achievements
         })
 
         print(f"🏳️ Match {match_id} ended by resignation. Winner: {winner_id}, Loser: {loser_id}")
@@ -577,5 +622,8 @@ class WebSocketManager:
         if match_id in self.match_timers:
             self.match_timers[match_id]["status"] = "completed"
 
+
+    
+    
 # Global WebSocket manager instance
 websocket_manager = WebSocketManager()

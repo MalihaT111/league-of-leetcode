@@ -209,6 +209,127 @@
   text-align: center;
 }
 
+/* Achievements.tsx styles */
+.achievementsCard {
+  composes: card;
+  width: clamp(320px, 90vw, 400px);
+  min-height: 459px;
+  height: auto;
+}
+
+.achievementsTitle {
+  margin-bottom: 20px;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+}
+
+.achievementsSummary {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(189, 155, 255, 0.15);
+}
+
+.achievementsProgress {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.achievementsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.achievementsGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.achievementsGrid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.achievementsGrid::-webkit-scrollbar-thumb {
+  background: rgba(189, 155, 255, 0.3);
+  border-radius: 3px;
+}
+
+.achievementsGrid::-webkit-scrollbar-thumb:hover {
+  background: rgba(189, 155, 255, 0.5);
+}
+
+.achievementCard {
+  padding: 12px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.achievementUnlocked {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.2);
+  position: relative;
+}
+
+.achievementUnlocked::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.achievementUnlocked:hover {
+  background: rgba(255, 215, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2), 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.achievementLocked {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.achievementLocked:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.achievementIcon {
+  flex-shrink: 0;
+}
+
+.difficultyBadge {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.achievementDescription {
+  line-height: 1.4;
+  font-size: clamp(12px, 1.5vw, 14px);
+}
+
+.unlockedIndicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(157, 255, 189, 0.2);
+  border: 1px solid rgba(157, 255, 189, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9dffbd;
+  flex-shrink: 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .table {
@@ -217,5 +338,13 @@
   
   .headerContainer {
     padding: 12px;
+  }
+
+  .achievementsCard {
+    width: clamp(280px, 95vw, 400px);
+  }
+
+  .achievementsGrid {
+    max-height: 250px;
   }
 }

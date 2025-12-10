@@ -16,6 +16,12 @@ import {
   useDeclineFriendRequest,
   useCancelFriendRequest,
   useRemoveFriend,
+  usePendingMatchRequests,
+  useMatchState,
+  useSendMatchRequest,
+  useAcceptMatchRequest,
+  useRejectMatchRequest,
+  useCancelMatchRequest,
 } from "@/lib/api/queries/friends";
 import styles from "./Friends.module.css";
 
@@ -30,6 +36,29 @@ export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<string | null>("friends");
   const router = useRouter();
 
+  // All hooks must be called before any conditional returns
+  const { data: searchResults, isLoading: searchLoading } = useSearchUsers(
+    userId || 0,
+    searchQuery,
+    searchQuery.length >= 2
+  );
+  const { data: friendsList, isLoading: friendsLoading } = useFriendsList(userId || 0);
+  const { data: friendRequests, isLoading: requestsLoading } = useFriendRequests(userId || 0);
+  const { data: matchRequests, isLoading: matchRequestsLoading } = usePendingMatchRequests(userId || 0);
+  const { data: matchState } = useMatchState(userId || 0);
+
+  const sendRequest = useSendFriendRequest();
+  const acceptRequest = useAcceptFriendRequest();
+  const declineRequest = useDeclineFriendRequest();
+  const cancelRequest = useCancelFriendRequest();
+  const removeFriendMutation = useRemoveFriend();
+  
+  const sendMatchRequestMutation = useSendMatchRequest();
+  const acceptMatchRequestMutation = useAcceptMatchRequest();
+  const rejectMatchRequestMutation = useRejectMatchRequest();
+  const cancelMatchRequestMutation = useCancelMatchRequest();
+
+  // Get current user
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
@@ -43,20 +72,52 @@ export default function FriendsPage() {
     getCurrentUser();
   }, [router]);
 
-  const { data: searchResults, isLoading: searchLoading } = useSearchUsers(
-    userId || 0,
-    searchQuery,
-    searchQuery.length >= 2
-  );
-  const { data: friendsList, isLoading: friendsLoading } = useFriendsList(userId || 0);
-  const { data: friendRequests, isLoading: requestsLoading } = useFriendRequests(userId || 0);
+  // Handle match request acceptance - redirect to match page
+  useEffect(() => {
+    if (acceptMatchRequestMutation.isSuccess && acceptMatchRequestMutation.data?.match_id) {
+      // Redirect to match page - the WebSocket will handle the match_found event
+      router.push(`/match`);
+    }
+  }, [acceptMatchRequestMutation.isSuccess, acceptMatchRequestMutation.data, router]);
 
-  const sendRequest = useSendFriendRequest();
-  const acceptRequest = useAcceptFriendRequest();
-  const declineRequest = useDeclineFriendRequest();
-  const cancelRequest = useCancelFriendRequest();
-  const removeFriendMutation = useRemoveFriend();
+  // Check if user has a pending sent request that was accepted (for sender)
+  useEffect(() => {
+    const checkAcceptedRequest = async () => {
+      if (!userId || !matchRequests?.sent || matchRequests.sent.length === 0) return;
+      
+      // Check if any sent request resulted in an active match
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/friends/${userId}/match-state`);
+        const state = await response.json();
+        
+        // If user is in an active match, redirect to match page
+        if (state.in_active_match) {
+          router.push(`/match`);
+        }
+      } catch (error) {
+        console.error("Failed to check match state:", error);
+      }
+    };
 
+    // Check every 2 seconds if user has sent requests
+    const interval = setInterval(checkAcceptedRequest, 2000);
+    return () => clearInterval(interval);
+  }, [userId, matchRequests?.sent, router]);
+
+  // Handle errors
+  useEffect(() => {
+    if (sendMatchRequestMutation.isError) {
+      alert(sendMatchRequestMutation.error?.message || "Failed to send match request");
+    }
+  }, [sendMatchRequestMutation.isError, sendMatchRequestMutation.error]);
+
+  useEffect(() => {
+    if (acceptMatchRequestMutation.isError) {
+      alert(acceptMatchRequestMutation.error?.message || "Failed to accept match request");
+    }
+  }, [acceptMatchRequestMutation.isError, acceptMatchRequestMutation.error]);
+
+  // Early return after all hooks
   if (!userId) {
     return (
       <Flex className={`${spaceGrotesk.className} ${styles.page}`}>
@@ -70,6 +131,7 @@ export default function FriendsPage() {
 
   const friendCount = friendsList?.length || 0;
   const requestCount = (friendRequests?.received?.length || 0) + (friendRequests?.sent?.length || 0);
+  const matchRequestCount = matchRequests?.received?.length || 0;
 
   return (
     <Flex
@@ -98,7 +160,10 @@ export default function FriendsPage() {
               My Friends ({friendCount})
             </Tabs.Tab>
             <Tabs.Tab value="requests">
-              Requests ({requestCount})
+              Friend Requests ({requestCount})
+            </Tabs.Tab>
+            <Tabs.Tab value="match-requests">
+              Match Requests ({matchRequestCount})
             </Tabs.Tab>
             <Tabs.Tab value="search">
               Add Friends
@@ -114,24 +179,53 @@ export default function FriendsPage() {
               </div>
             ) : friendsList && friendsList.length > 0 ? (
               <Stack gap="md">
-                {friendsList.map((friend: any) => (
-                  <FriendCard
-                    key={friend.user_id}
-                    username={friend.username}
-                    leetcodeUsername={friend.leetcode_username}
-                    elo={friend.user_elo}
-                    profilePictureUrl={friend.profile_picture_url}
-                    actions={
-                      <ActionButton
-                        variant="remove"
-                        onClick={() => removeFriendMutation.mutate({ userId, friendId: friend.user_id })}
-                        loading={removeFriendMutation.isPending}
-                      >
-                        Remove
-                      </ActionButton>
-                    }
-                  />
-                ))}
+                {friendsList.map((friend: any) => {
+                  const pendingRequest = matchRequests?.sent?.find((req: any) => req.receiver_id === friend.user_id);
+                  const hasPendingSent = !!pendingRequest;
+                  const canSendMatchRequest = matchState?.can_send_match_request && !hasPendingSent;
+                  
+                  return (
+                    <FriendCard
+                      key={friend.user_id}
+                      username={friend.username}
+                      leetcodeUsername={friend.leetcode_username}
+                      elo={friend.user_elo}
+                      actions={
+                        <>
+                          {hasPendingSent ? (
+                            <ActionButton
+                              variant="cancel"
+                              onClick={() => {
+                                if (pendingRequest && userId) {
+                                  cancelMatchRequestMutation.mutate({ requestId: pendingRequest.request_id, userId });
+                                }
+                              }}
+                              loading={cancelMatchRequestMutation.isPending}
+                            >
+                              Cancel Match
+                            </ActionButton>
+                          ) : (
+                            <ActionButton
+                              variant="challenge"
+                              onClick={() => sendMatchRequestMutation.mutate({ userId, friendId: friend.user_id })}
+                              loading={sendMatchRequestMutation.isPending}
+                              disabled={!canSendMatchRequest}
+                            >
+                              Challenge
+                            </ActionButton>
+                          )}
+                          <ActionButton
+                            variant="remove"
+                            onClick={() => removeFriendMutation.mutate({ userId, friendId: friend.user_id })}
+                            loading={removeFriendMutation.isPending}
+                          >
+                            Remove
+                          </ActionButton>
+                        </>
+                      }
+                    />
+                  );
+                })}
               </Stack>
             ) : (
               <div className={styles.emptyState}>
@@ -140,7 +234,48 @@ export default function FriendsPage() {
             )}
           </Tabs.Panel>
 
-          {/* Requests Tab */}
+          {/* Match Requests Tab */}
+          <Tabs.Panel value="match-requests" pt="xl">
+            {matchRequestsLoading ? (
+              <div className={styles.loadingState}>
+                <Loader color="rgba(189, 155, 255, 1)" />
+              </div>
+            ) : matchRequests?.received && matchRequests.received.length > 0 ? (
+              <Stack gap="md">
+                {matchRequests.received.map((request: any) => (
+                  <FriendCard
+                    key={friend.user_id}
+                    username={friend.username}
+                    leetcodeUsername={friend.leetcode_username}
+                    elo={friend.user_elo}
+                    profilePictureUrl={friend.profile_picture_url}
+                    actions={
+                      <>
+                        <ActionButton
+                          variant="accept"
+                          onClick={() => acceptMatchRequestMutation.mutate({ requestId: request.request_id, userId })}
+                          loading={acceptMatchRequestMutation.isPending}
+                        >
+                          Accept
+                        </ActionButton>
+                        <ActionButton
+                          variant="remove"
+                          onClick={() => rejectMatchRequestMutation.mutate({ requestId: request.request_id, userId })}
+                          loading={rejectMatchRequestMutation.isPending}
+                        >
+                          Reject
+                        </ActionButton>
+                      </>
+                    }
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <div className={styles.emptyState}>No pending match requests</div>
+            )}
+          </Tabs.Panel>
+
+          {/* Friend Requests Tab */}
           <Tabs.Panel value="requests" pt="xl">
             {requestsLoading ? (
               <div className={styles.loadingState}>

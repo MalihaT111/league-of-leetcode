@@ -33,7 +33,6 @@ class ResultsService:
             select(User).where(User.id == match_history.winner_id)
         )
         winner = winner_result.scalar_one_or_none()
-        print(winner.leetcode_username)
         loser_result = await db.execute(
             select(User).where(User.id == match_history.loser_id)
         )
@@ -55,7 +54,8 @@ class ResultsService:
                 "elo_after": match_history.winner_elo,
                 "elo_change": match_history.elo_change,
                 "runtime": match_history.winner_runtime,
-                "memory": match_history.winner_memory
+                "memory": match_history.winner_memory,
+                "code": match_history.winner_code
             },
             "loser": {
                 "id": match_history.loser_id,
@@ -64,15 +64,15 @@ class ResultsService:
                 "elo_after": match_history.loser_elo,
                 "elo_change": -abs(match_history.elo_change),
                 "runtime": match_history.loser_runtime,
-                "memory": match_history.loser_memory
+                "memory": match_history.loser_memory,
+                "code": match_history.loser_code
             },
             "problem": {
-                "slug": match_history.leetcode_problem,
                 "title": problem_title,
                 "url": f"https://leetcode.com/problems/{match_history.leetcode_problem}/"
             },
-            "match_duration": match_history.match_seconds,
-            "elo_change": match_history.elo_change
+            "elo_change": match_history.elo_change,
+            "match_duration": match_history.match_seconds
         }
     
     @staticmethod

@@ -1,6 +1,6 @@
 # backend/src/friends/service.py
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, and_, or_
 from fastapi import HTTPException
 from typing import List, Optional
 from src.database.models import User, Friends
@@ -192,7 +192,10 @@ async def cancel_friend_request(db: AsyncSession, sender_id: int, target_id: int
 
 
 async def remove_friend(db: AsyncSession, user_id: int, friend_id: int) -> dict:
-    """Remove a friend from both users' friends lists"""
+    """Remove a friend from both users' friends lists and cancel pending match requests"""
+    from sqlalchemy import update
+    from src.database.models import FriendMatchRequest
+    from datetime import datetime
     
     # Validate users exist
     user_result = await db.execute(select(User).where(User.id == user_id))
@@ -213,10 +216,36 @@ async def remove_friend(db: AsyncSession, user_id: int, friend_id: int) -> dict:
         raise HTTPException(status_code=400, detail="Not friends with this user")
     
     # Remove from both friends lists
-    user_friends.current_friends.remove(friend_id)
+    # Create new lists to ensure SQLAlchemy detects the change
+    user_friends.current_friends = [f for f in user_friends.current_friends if f != friend_id]
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(user_friends, "current_friends")
     
     if user_id in (friend_friends.current_friends or []):
-        friend_friends.current_friends.remove(user_id)
+        friend_friends.current_friends = [f for f in friend_friends.current_friends if f != user_id]
+        flag_modified(friend_friends, "current_friends")
+    
+    # Cancel any pending match requests between these users
+    now = datetime.utcnow()
+    await db.execute(
+        update(FriendMatchRequest)
+        .where(
+            and_(
+                or_(
+                    and_(
+                        FriendMatchRequest.sender_id == user_id,
+                        FriendMatchRequest.receiver_id == friend_id
+                    ),
+                    and_(
+                        FriendMatchRequest.sender_id == friend_id,
+                        FriendMatchRequest.receiver_id == user_id
+                    )
+                ),
+                FriendMatchRequest.status == 'PENDING'
+            )
+        )
+        .values(status='CANCELLED', responded_at=now)
+    )
     
     await db.commit()
     

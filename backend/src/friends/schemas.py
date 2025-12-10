@@ -1,6 +1,7 @@
 # backend/src/friends/schemas.py
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
+from enum import Enum
 
 
 class FriendRequest(BaseModel):
@@ -48,3 +49,40 @@ class FriendRequestsResponse(BaseModel):
 class MessageResponse(BaseModel):
     """Generic message response"""
     message: str
+
+
+# Match request schemas
+class MatchRequestStatus(str, Enum):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    CANCELLED = "CANCELLED"
+    EXPIRED = "EXPIRED"
+
+
+class SendMatchRequestSchema(BaseModel):
+    """Schema for sending a match request"""
+    friend_id: int
+
+
+class MatchRequestResponse(BaseModel):
+    """Schema for match request information"""
+    request_id: int
+    sender_id: int
+    receiver_id: int
+    sender_username: str
+    receiver_username: str
+    sender_elo: int
+    receiver_elo: int
+    status: str
+    created_at: str
+    expires_at: str
+
+
+class MatchRequestActionResponse(BaseModel):
+    """Schema for match request action response"""
+    message: str
+    request_id: int
+    match_id: Optional[int] = None
+    problem: Optional[dict] = None
+    expires_at: Optional[str] = None

@@ -12,18 +12,18 @@
 .content {
   display: flex;
   flex-direction: row;
-  gap: clamp(24px, 4vw, 60px);
+  gap: clamp(20px, 3vw, 40px);
   justify-content: center;
   align-items: stretch;
   width: 100%;
-  max-width: 1200px;
-  flex-wrap: nowrap;
+  max-width: 1400px;
+  flex-wrap: wrap;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .content {
     flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 }

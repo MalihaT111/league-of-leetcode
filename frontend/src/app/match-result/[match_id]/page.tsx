@@ -16,6 +16,8 @@ import { Space_Grotesk } from "next/font/google";
 import { PlayerResult } from "@/components/match/Result";
 import { useMatchResults } from "@/lib/api/queries";
 import { useState, useEffect } from "react";
+import ResultCode from "@/components/match-results/ResultCode";
+import ResultStats from "@/components/match-results/ResultStats";
 import styles from "../MatchResult.module.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -58,9 +60,13 @@ export default function MatchResultPage() {
   // Get actual ELO values for animation
   const winnerElo = data?.winner?.elo_change || data?.elo_change || 0;
   const loserElo = data?.loser?.elo_change || -(data?.elo_change || 0);
-  
+    const [resultsBox, setResultsBox] = useState<"stats" | "code">(
+    "code"
+  );
+
   const animatedWinnerElo = useAnimatedNumber(winnerElo, 700, 600);
   const animatedLoserElo = useAnimatedNumber(Math.abs(loserElo), 700, 700);
+
 
   if (isNaN(matchId)) {
     return <Alert color="red">Invalid match ID.</Alert>;
@@ -137,9 +143,10 @@ export default function MatchResultPage() {
   const result = {
     match_id: data.match_id,
     problem: {
-      title: data.problem || "Unknown Problem",
-      slug: data.problem || "unknown",
-      difficulty: "Medium",
+      title: data.problem.title || "Unknown Problem",
+      slug: data.problem.slug || "unknown",
+      url: data.problem.url || "unknown",
+      difficulty: "Medium", // Mock difficulty
     },
     duration: formatDuration(data.match_duration || 0),
     winner: {
@@ -147,12 +154,14 @@ export default function MatchResultPage() {
       runtime: data.winner?.runtime || 0,
       memory: data.winner?.memory || 0,
       elo_change: winnerElo,
+      code: data.winner?.code || "",
     },
     loser: {
       username: data.loser?.username || "Loser",
       runtime: data.loser?.runtime || 0,
       memory: data.loser?.memory || 0,
       elo_change: loserElo,
+      code: data.loser?.code || "",
     },
   };
 
@@ -162,19 +171,15 @@ export default function MatchResultPage() {
         result.winner.runtime === -1 ? "N/A" : `${result.winner.runtime} ms`,
       memoryUsage:
         result.winner.memory === -1 ? "N/A" : `${result.winner.memory} MB`,
+      code: result.winner.code
     },
     loser: {
       executionTime:
         result.loser.runtime === -1 ? "N/A" : `${result.loser.runtime} ms`,
       memoryUsage:
         result.loser.memory === -1 ? "N/A" : `${result.loser.memory} MB`,
+      code: result.loser.code
     },
-  };
-
-  const getStatValueClass = (value: string, type: "runtime" | "memory") => {
-    if (value === "N/A") return styles.statValueNA;
-    if (type === "memory") return styles.statValueMemory;
-    return selectedPlayer === "winner" ? styles.statValueWinner : styles.statValueLoser;
   };
 
   return (
@@ -203,38 +208,39 @@ export default function MatchResultPage() {
               : `${result.loser.username}'s Performance`}
           </Text>
           <Paper radius="md" p="lg" className={styles.performancePaper}>
-            <Stack gap="md">
+            <Stack gap="md" mih={"270"}>
               <Text size="xs" tt="uppercase" className={styles.statsHeader}>
-                {selectedPlayer === "winner" ? "Winner's Stats" : "Loser's Stats"}
+                {
+                  resultsBox === "code"
+                    ? selectedPlayer === "winner"
+                      ? "Winner's Code"
+                      : "Loser's Code"
+                    : selectedPlayer === "winner"
+                      ? "Winner's Stats"
+                      : "Loser's Stats"
+                }
               </Text>
-              
-              <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
-                <Text size="sm" c="rgba(220, 220, 255, 0.6)">
-                  Runtime
-                </Text>
-                <Text
-                  size="lg"
-                  fw={700}
-                  className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].executionTime, "runtime")}`}
-                >
-                  {performanceData[selectedPlayer].executionTime}
-                </Text>
-              </Flex>
-
-              <Flex justify="space-between" align="center" p="sm" className={styles.statRow}>
-                <Text size="sm" c="rgba(220, 220, 255, 0.6)">
-                  Memory
-                </Text>
-                <Text
-                  size="lg"
-                  fw={700}
-                  className={`${styles.statValue} ${getStatValueClass(performanceData[selectedPlayer].memoryUsage, "memory")}`}
-                >
-                  {performanceData[selectedPlayer].memoryUsage}
-                </Text>
-              </Flex>
+                {resultsBox === "code" ? (
+                    <ResultCode
+                      code={performanceData[selectedPlayer].code}
+                    />
+                ) : (
+                    <ResultStats
+                      time={performanceData[selectedPlayer].executionTime}
+                      memory={performanceData[selectedPlayer].memoryUsage}
+                    />
+                )}
             </Stack>
           </Paper>
+          <Button
+            variant="light"
+            fullWidth
+            onClick={() =>
+              setResultsBox(resultsBox === "code" ? "stats" : "code")
+            }
+          >
+            {resultsBox === "code" ? "View Stats" : "View Code"}
+          </Button>
         </Stack>
 
         {/* Right: Player Cards + Info */}
@@ -285,7 +291,7 @@ export default function MatchResultPage() {
         <Button
           className={styles.glassButton}
           component="a"
-          href={`https://leetcode.com/problems/${result.problem.slug}/`}
+          href={result.problem.url}
           target="_blank"
         >
           View Problem

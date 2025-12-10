@@ -2,47 +2,81 @@ from fastapi import HTTPException
 import httpx
 import json
 import os
+import sys
+import asyncio
+import subprocess
 from typing import List, Optional
-from src.leetcode.service.client import LeetCodeGraphQLClient
-from src.leetcode.schemas import Problem, UserSubmission, ProblemStats, SyncResult
-from src.leetcode.enums.difficulty import DifficultyEnum
-from src.leetcode.service.graphql_queries import *
 from collections import defaultdict
+
+from .client import LeetCodeGraphQLClient
+from ..schemas import Problem, UserSubmission, ProblemStats, SyncResult
+from ..enums.difficulty import DifficultyEnum
+from .graphql_queries import *
+
+# -------------------------------------------------------------------
+# Paths / constants
+# -------------------------------------------------------------------
 
 CACHE_FILE = "topic_map_cache.json"
 ALL_DIFFS = {"EASY", "MEDIUM", "HARD"}
 TOPIC_MAP_CACHE = None
-TOKENS_FILE = "backend/auth_tokens/leetcode_tokens.json"
+
+TOKENS_FILE = os.path.join(os.path.dirname(__file__), "auth_tokens", "leetcode_tokens.json")
 
 
-def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
+# -------------------------------------------------------------------
+# Auth cookie loader
+# -------------------------------------------------------------------
+
+async def load_auth_cookies(filepath: str = TOKENS_FILE) -> str:
     """
     Load LeetCode authentication cookies from the saved tokens file.
-    Returns formatted cookie string: "csrftoken=<token>; LEETCODE_SESSION=<session>"
+    If tokens don't exist, automatically runs authentication.
+
+    Returns formatted cookie string:
+        "csrftoken=<token>; LEETCODE_SESSION=<session>"
     """
     try:
+        # Check if tokens file exists
         if not os.path.exists(filepath):
-            raise FileNotFoundError(
-                f"Tokens file not found: {filepath}. "
-                "Run 'python backend/leetcode_auth_viewer.py' to authenticate."
-            )
-        
-        with open(filepath, 'r') as f:
+            print(f"⚠️  Tokens file not found: {filepath}")
+            print("🔄 Running automatic authentication...")
+
+            # Import and run authentication
+            from .auth_tokens.leetcode_auth_viewer import get_leetcode_tokens
+
+
+            # Run authentication (no force refresh by default)
+            session_token, csrf_token = await get_leetcode_tokens(force_refresh=False)
+
+            print("✅ Authentication completed automatically!")
+            return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
+
+        # Load existing tokens
+        with open(filepath, "r", encoding="utf-8") as f:
             tokens_data = json.load(f)
-        
-        csrf_token = tokens_data.get('csrftoken', '')
-        session_token = tokens_data.get('LEETCODE_SESSION', '')
-        
+
+        csrf_token = tokens_data.get("csrftoken", "")
+        session_token = tokens_data.get("LEETCODE_SESSION", "")
+
         if not session_token:
             raise ValueError("LEETCODE_SESSION token not found in tokens file")
-        
+
         return f"csrftoken={csrf_token}; LEETCODE_SESSION={session_token}"
-    
+
+    except HTTPException:
+        # Pass through FastAPI HTTPExceptions unchanged
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to load authentication tokens: {str(e)}"
+            detail=f"Failed to load authentication tokens: {str(e)}",
         )
+
+
+# -------------------------------------------------------------------
+# LeetCodeService
+# -------------------------------------------------------------------
 
 class LeetCodeService:
     @staticmethod
@@ -60,7 +94,6 @@ class LeetCodeService:
     async def fetch_leetcode_questions():
         data = await LeetCodeGraphQLClient.query(MAPPING_QUERY)
         return data["data"]["problemsetQuestionListV2"]["questions"]
-
 
     @staticmethod
     async def refresh_topic_difficulty_map():
@@ -93,23 +126,33 @@ class LeetCodeService:
             json.dump(filtered, f)
 
         return {"status": "updated", "topics": len(filtered)}
-    
+
     @staticmethod
     async def get_problem(slug: str) -> Problem:
         data = await LeetCodeGraphQLClient.query(PROBLEM_QUERY, {"titleSlug": slug})
         return data
-    
+
     @staticmethod
     async def get_user_submissions(username: str):
-        data = await LeetCodeGraphQLClient.query(RECENT_AC_SUBMISSIONS_QUERY, {"username": username})
+        data = await LeetCodeGraphQLClient.query(
+            RECENT_AC_SUBMISSIONS_QUERY, {"username": username}
+        )
         return data["data"]["recentAcSubmissionList"]
-    
+
     @staticmethod
     async def get_recent_user_submission(username: str) -> Optional[UserSubmission]:
         submissions = await LeetCodeService.get_user_submissions(username)
         if not submissions:
             return None
+            
         submission = submissions[0]
+        
+        submission_details = await LeetCodeService.get_submission_details(
+            submission["id"]
+        )
+        
+        print(submission_details.keys())
+        
         return UserSubmission(
             id=submission["id"],
             title=submission["title"],
@@ -117,27 +160,32 @@ class LeetCodeService:
             timestamp=submission["timestamp"],
             lang=submission["lang"],
             runtime=submission["runtime"],
-            memory=submission["memory"]
+            memory=submission["memory"],
+            code=submission_details["code"],
         )
-    
+
     @staticmethod
     async def get_user_stats(username: str) -> ProblemStats:
         """Get user's LeetCode statistics (Easy, Medium, Hard only)."""
-        data = await LeetCodeGraphQLClient.query(QUESTION_STATS_QUERY, {"username": username})
+        data = await LeetCodeGraphQLClient.query(
+            QUESTION_STATS_QUERY, {"username": username}
+        )
 
-        # LeetCodeGraphQLClient already returns the `data` portion,
-        # so you should check inside that structure.
-        matched_user = data.get("data",{}).get("matchedUser")
+        matched_user = data.get("data", {}).get("matchedUser")
 
         if not matched_user:
-            raise HTTPException(status_code=404, detail=f"User '{username}' not found on LeetCode.")
+            raise HTTPException(
+                status_code=404,
+                detail=f"User '{username}' not found on LeetCode.",
+            )
 
-        # Extract submission stats
         stats = matched_user["submitStats"]["acSubmissionNum"]
-        # Filter to only Easy, Medium, Hard
-        filtered = {s["difficulty"]: s["count"] for s in stats if s["difficulty"] in ["All", "Easy", "Medium", "Hard"]}
+        filtered = {
+            s["difficulty"]: s["count"]
+            for s in stats
+            if s["difficulty"] in ["All", "Easy", "Medium", "Hard"]
+        }
 
-        # Safely get counts (0 if missing)
         total = filtered.get("All", 0)
         easy = filtered.get("Easy", 0)
         medium = filtered.get("Medium", 0)
@@ -149,7 +197,7 @@ class LeetCodeService:
             medium_solved=medium,
             hard_solved=hard,
         )
-    
+
     @staticmethod
     async def get_user_profile_summary(username: str) -> dict:
         """
@@ -157,14 +205,17 @@ class LeetCodeService:
         Returns the profile data including username, ranking, avatar, realName, and aboutMe.
         """
         data = await LeetCodeGraphQLClient.query(PROFILE_QUERY, {"username": username})
-        
+
         matched_user = data.get("data", {}).get("matchedUser")
-        
+
         if not matched_user:
-            raise HTTPException(status_code=404, detail=f"User '{username}' not found on LeetCode.")
-        
+            raise HTTPException(
+                status_code=404,
+                detail=f"User '{username}' not found on LeetCode.",
+            )
+
         profile = matched_user.get("profile", {})
-        
+
         return {
             "username": matched_user.get("username"),
             "ranking": profile.get("ranking"),
@@ -172,68 +223,58 @@ class LeetCodeService:
             "realName": profile.get("realName"),
             "aboutMe": profile.get("aboutMe", ""),
         }
-    
-    """
-"variables":{"categorySlug":"all-code-essentials","filtersV2":{"filterCombineType":"ALL","statusFilter":{"questionStatuses":[],"operator":"IS"},"difficultyFilter":{"difficulties":[],"operator":"IS"},"languageFilter":{"languageSlugs":[],"operator":"IS"},"topicFilter":{"topicSlugs":[],"operator":"IS"},"acceptanceFilter":{},"frequencyFilter":{},"frontendIdFilter":{},"lastSubmittedFilter":{},"publishedFilter":{},"companyFilter":{"companySlugs":[],"operator":"IS"},"positionFilter":{"positionSlugs":[],"operator":"IS"},"contestPointFilter":{"contestPoints":[],"operator":"IS"},"premiumFilter":{"premiumStatus":["NOT_PREMIUM"],"operator":"IS"}},"searchKeyword":""},"operationName":"randomQuestionV2"}
-    """
-    
-    
-    
-    
+
     @staticmethod
     async def get_random_problem(
         topics: Optional[list[str]] = None,
         difficulty: Optional[list[str]] = None,
         excluded_slugs: Optional[set[str]] = None,
-        max_attempts: int = 10
+        max_attempts: int = 10,
     ) -> Problem:
         """
         Fetch a random LeetCode problem filtered only by topic(s) and difficulty.
         Skips premium problems and excluded problems (for repeat=false).
-        
-        Args:
-            topics: List of topic slugs to filter by
-            difficulty: List of difficulty levels (EASY, MEDIUM, HARD)
-            excluded_slugs: Set of problem slugs to exclude (completed problems)
-            max_attempts: Maximum number of attempts to find a non-excluded problem
         """
         excluded_slugs = excluded_slugs or set()
 
-        # Build the GraphQL filter structure
         filters = {
             "filterCombineType": "ALL",
             "topicFilter": {
                 "topicSlugs": topics or [],
-                "operator": "IS"
+                "operator": "IS",
             },
             "difficultyFilter": {
-                "difficulties": [str(d).upper() for d in difficulty] if difficulty else [],
-                "operator": "IS"
+                "difficulties": [str(d).upper() for d in difficulty]
+                if difficulty
+                else [],
+                "operator": "IS",
             },
             "premiumFilter": {
                 "premiumStatus": ["NOT_PREMIUM"],
-                "operator": "IS"
+                "operator": "IS",
             },
         }
 
         variables = {
             "categorySlug": "all-code-essentials",
             "filtersV2": filters,
-            "searchKeyword": ""
+            "searchKeyword": "",
         }
 
-        # Try multiple times to get a non-excluded problem
         for attempt in range(max_attempts):
             try:
-                response = await LeetCodeGraphQLClient.query(RANDOM_QUESTION_QUERY, variables)
+                response = await LeetCodeGraphQLClient.query(
+                    RANDOM_QUESTION_QUERY, variables
+                )
                 random_slug = response["data"]["randomQuestionV2"]["titleSlug"]
 
                 if not random_slug:
                     raise ValueError("LeetCode API returned no titleSlug")
 
-                # Check if this problem is excluded
                 if random_slug in excluded_slugs:
-                    print(f"🔄 Attempt {attempt + 1}: Problem {random_slug} already completed, retrying...")
+                    print(
+                        f"🔄 Attempt {attempt + 1}: Problem {random_slug} already completed, retrying..."
+                    )
                     continue
 
                 print(f"🎯 Selected random problem: {random_slug}")
@@ -250,33 +291,34 @@ class LeetCodeService:
                     slug=problem["titleSlug"],
                     difficulty=problem["difficulty"],
                     tags=[tag["name"] for tag in problem["topicTags"]],
-                    acceptance_rate=acceptance_rate
+                    acceptance_rate=acceptance_rate,
                 )
-            
+
             except Exception as e:
                 if attempt < max_attempts - 1:
                     continue
                 print(f"⚠️ Failed to fetch random problem: {e}")
                 return {"error": str(e)}
-        
-        # If we exhausted all attempts, all problems were excluded
-        error_msg = "You've completed all questions under your current filters. Enable Repeat Questions or widen your topics."
+
+        error_msg = (
+            "You've completed all questions under your current filters. "
+            "Enable Repeat Questions or widen your topics."
+        )
         print(f"⚠️ {error_msg}")
         return {"error": error_msg}
-    
+
     @staticmethod
     async def get_submission_details(submission_id: int) -> dict:
         """
         Fetch details of a specific submission by its ID.
         Automatically loads authentication cookies from the saved tokens file.
         """
-        # Load authentication cookies from file
-        auth_cookies = load_auth_cookies()
+        auth_cookies = await load_auth_cookies()
         
-        # Query with authentication
         data = await LeetCodeGraphQLClient.query(
-            SUBMISSION_DETAILS, 
-            {"submissionId": submission_id}, 
-            auth_cookies
+            SUBMISSION_DETAILS_QUERY,
+            {"submissionId": submission_id},
+            auth_cookies,
         )
+        print(data)
         return data["data"]["submissionDetails"]
