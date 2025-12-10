@@ -67,6 +67,7 @@ export default function MatchResultPage() {
   const animatedWinnerElo = useAnimatedNumber(winnerElo, 700, 600);
   const animatedLoserElo = useAnimatedNumber(Math.abs(loserElo), 700, 700);
 
+
   if (isNaN(matchId)) {
     return <Alert color="red">Invalid match ID.</Alert>;
   }
@@ -179,12 +180,6 @@ export default function MatchResultPage() {
         result.loser.memory === -1 ? "N/A" : `${result.loser.memory} MB`,
       code: result.loser.code
     },
-  };
-
-  const getStatValueClass = (value: string, type: "runtime" | "memory") => {
-    if (value === "N/A") return styles.statValueNA;
-    if (type === "memory") return styles.statValueMemory;
-    return selectedPlayer === "winner" ? styles.statValueWinner : styles.statValueLoser;
   };
 
   return (

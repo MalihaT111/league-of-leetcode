@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { notifications } from '@mantine/notifications';
+import { Achievement } from '@/lib/api/queries/achievements/types';
 
 interface MatchFoundData {
   match_id: number;
@@ -30,6 +32,7 @@ interface WebSocketMessage {
   seconds?: number;
   formatted_time?: string;
   start_timestamp?: number;
+  achievements_unlocked?: Achievement[];
 }
 
 export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?: () => void) => {
@@ -48,6 +51,28 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
   
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
+
+  // Function to display achievement notifications
+  const displayAchievementNotifications = useCallback((achievements: Achievement[]) => {
+    achievements.forEach((achievement, index) => {
+      // Stagger notifications to avoid overlap
+      setTimeout(() => {
+        notifications.show({
+          id: `achievement-${achievement.id}`,
+          title: '🏆 Achievement Unlocked!',
+          message: achievement.description,
+          color: 'yellow',
+          autoClose: 5000,
+          withCloseButton: true,
+          style: {
+            background: "linear-gradient(135deg, rgba(139, 69, 19, 0.1), rgba(255, 215, 0, 0.1))",
+            border: "1px solid rgba(255, 215, 0, 0.3)",
+            boxShadow: "0 4px 20px rgba(255, 215, 0, 0.2)"
+          }
+        });
+      }, index * 1000); // 1 second delay between notifications
+    });
+  }, []);
 
   const connect = useCallback(() => {
     if (!userId || wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -107,15 +132,25 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
           case 'match_completed':
             console.log('🏁 Match completed:', message.result);
             
+            // Display achievement notifications if any were unlocked
+            if (message.achievements_unlocked && message.achievements_unlocked.length > 0) {
+              console.log('🏆 Achievements unlocked:', message.achievements_unlocked);
+              displayAchievementNotifications(message.achievements_unlocked);
+            }
+            
             // Notify parent that match is completed (but keep state for UI)
             if (onMatchCompleted) {
               onMatchCompleted();
             }
             
-            // Redirect to results page after short delay
+            // Redirect to results page after delay (longer if achievements were unlocked)
+            const redirectDelay = message.achievements_unlocked && message.achievements_unlocked.length > 0 
+              ? 3000 + (message.achievements_unlocked.length * 1000) // Extra time for achievement notifications
+              : 2000;
+            
             setTimeout(() => {
               router.push(`/match-result/${message.match_id}`);
-            }, 2000);
+            }, redirectDelay);
             break;
 
           case 'error':
@@ -159,7 +194,7 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
       setError('Connection error');
     };
 
-  }, [userId, router]);
+  }, [userId, router, displayAchievementNotifications]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
@@ -170,7 +205,7 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
     setIsInQueue(false);
   }, []);
 
-  const sendMessage = useCallback((message: any) => {
+  const sendMessage = useCallback((message: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
     } else {
