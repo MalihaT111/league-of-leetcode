@@ -8,15 +8,15 @@ from .achievements import ACHIEVEMENTS
 
 router = APIRouter(prefix="/achievements", tags=["achievements"])
 
-@router.get("/")
+@router.get("/{user_id}")
 async def get_user_achievements(
-    current_user: User = Depends(current_user),
+    user_id: int,
     db: AsyncSession = Depends(get_db)
 ):
     """Get current user's achievement status"""
     
     # Get fresh user data from database
-    user_result = await db.execute(select(User).where(User.id == current_user.id))
+    user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
     
     if not user:

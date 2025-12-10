@@ -5,14 +5,20 @@ import { Flex, Title } from "@mantine/core";
 import Navbar from "@/components/all/Navbar";
 import ProfileStatsCard from "@/components/profile/Stats";
 import RecentSubmissionsTable from "@/components/profile/Submissions";
+import ProfileAchievements from "@/components/profile/achievements/ProfileAchievements";
 import { useParams } from "next/navigation";
 import styles from "./Profile.module.css";
+import NotFound from "@/app/not-found";
 
 export default function ProfilePage() {
   const { id } = useParams();
   const userId = Number(id);
 
   const { data, isLoading, error } = useProfileQuery(userId);
+
+  if (!userId || Number.isNaN(userId)) {
+    return <NotFound />
+  }
 
   if (isLoading) return null;
   if (error || !data) return <p>Failed to load profile data.</p>;
@@ -37,6 +43,7 @@ export default function ProfilePage() {
       <Flex className={styles.content}>
         <ProfileStatsCard user={user} stats={stats} />
         <RecentSubmissionsTable matches={recent_matches} />
+        <ProfileAchievements userId={userId} />
       </Flex>
     </Flex>
   );

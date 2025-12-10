@@ -11,7 +11,6 @@ interface AchievementNotificationProps {
 }
 
 export const AchievementNotification = ({ 
-  title, 
   description, 
   difficulty 
 }: AchievementNotificationProps) => {
@@ -20,8 +19,6 @@ export const AchievementNotification = ({
       case 'easy': return 'green';
       case 'medium': return 'yellow';
       case 'hard': return 'red';
-      case 'legendary': return 'purple';
-      default: return 'blue';
     }
   };
 
