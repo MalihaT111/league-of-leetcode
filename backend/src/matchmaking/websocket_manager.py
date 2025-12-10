@@ -12,6 +12,16 @@ from .elo_service import EloService
 import time
 
 class WebSocketManager:
+    """
+    WebSocket manager for handling real-time matchmaking and game events.
+    
+    Features:
+    - Real-time matchmaking queue management
+    - Match creation and timer management
+    - Solution submission and validation
+    - Match resignation handling
+    - Achievement tracking integration
+    """
     def __init__(self):
         # Store active connections by user_id
         self.active_connections: Dict[int, WebSocket] = {}
@@ -355,6 +365,10 @@ class WebSocketManager:
             loser.user_elo += loser_elo_change  # This will be negative
             match.winner_elo = winner.user_elo
             match.loser_elo = loser.user_elo
+            
+            
+            
+            
 
         # Set runtime, memory, and code data
         match.winner_runtime = winner_runtime
@@ -369,19 +383,30 @@ class WebSocketManager:
         # Stop the timer
         self.stop_match_timer(match_id)
 
+        # Check achievements for both players
+        from ..achievements.achievements import AchievementTracker
+        
+        # Check achievements for winner
+        winner_achievements = await AchievementTracker.check_achievements(winner_id, db, "match_completed")
+        
+        # Check achievements for loser (they still played a game)
+        loser_achievements = await AchievementTracker.check_achievements(loser_id, db, "match_completed")
+
         # Notify both players
         await self.send_to_user(winner_id, {
             "type": "match_completed",
             "result": "won",
             "match_id": match_id,
-            "elo_change": f"+{winner_elo_change}"
+            "elo_change": f"+{winner_elo_change}",
+            "achievements_unlocked": winner_achievements
         })
 
         await self.send_to_user(loser_id, {
             "type": "match_completed", 
             "result": "lost",
             "match_id": match_id,
-            "elo_change": f"{loser_elo_change}"  # Already negative
+            "elo_change": f"{loser_elo_change}",  # Already negative
+            "achievements_unlocked": loser_achievements
         })
 
         print(f"🏆 Match {match_id} completed. Winner: {winner_id}, Loser: {loser_id}")
@@ -492,13 +517,23 @@ class WebSocketManager:
 
         await db.commit()
 
+        # Check achievements for both players
+        from ..achievements.achievements import AchievementTracker
+        
+        # Check achievements for winner (they won by resignation)
+        winner_achievements = await AchievementTracker.check_achievements(winner_id, db, "match_completed")
+        
+        # Check achievements for loser (they still played a game)
+        loser_achievements = await AchievementTracker.check_achievements(loser_id, db, "match_completed")
+
         # Notify both players
         await self.send_to_user(winner_id, {
             "type": "match_completed",
             "result": "won",
             "match_id": match_id,
             "elo_change": f"+{winner_elo_change}",
-            "reason": "opponent_resigned"
+            "reason": "opponent_resigned",
+            "achievements_unlocked": winner_achievements
         })
 
         await self.send_to_user(loser_id, {
@@ -506,7 +541,8 @@ class WebSocketManager:
             "result": "lost",
             "match_id": match_id,
             "elo_change": f"{loser_elo_change}",  # Already negative
-            "reason": "resigned"
+            "reason": "resigned",
+            "achievements_unlocked": loser_achievements
         })
 
         print(f"🏳️ Match {match_id} ended by resignation. Winner: {winner_id}, Loser: {loser_id}")
@@ -583,5 +619,8 @@ class WebSocketManager:
         if match_id in self.match_timers:
             self.match_timers[match_id]["status"] = "completed"
 
+
+    
+    
 # Global WebSocket manager instance
 websocket_manager = WebSocketManager()

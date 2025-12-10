@@ -15,6 +15,7 @@ from src.profile.routes import router as profile_router
 from src.settings.routes import router as settings_router
 from src.friends.routes import router as friends_router
 from src.leetcode.routes import router as leetcode_router
+from src.achievements.routes import router as achievements_router
 
 # --- Lifespan event (startup/shutdown) ---
 @asynccontextmanager
@@ -52,6 +53,7 @@ app.include_router(profile_router)
 app.include_router(settings_router, prefix="/api", tags=["settings"])
 app.include_router(friends_router, tags=["friends"])
 app.include_router(leetcode_router, prefix="/api", tags=["leetcode"])
+app.include_router(achievements_router, prefix="/api", tags=["achievements"])
 
 # --- Root Health Check ---
 @app.get("/")
