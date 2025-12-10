@@ -60,7 +60,7 @@ class AchievementTracker:
     async def check_achievements(user_id: int, db: AsyncSession, event_type: str = "match_completed") -> list:
         """
         Check and update achievements for a user after a match event.
-        Returns list of newly unlocked achievement indices.
+        Returns list of newly unlocked achievement objects.
         """
         # Get user data
         user_result = await db.execute(select(User).where(User.id == user_id))
@@ -82,7 +82,16 @@ class AchievementTracker:
             # Check if achievement is unlocked
             if await AchievementTracker._check_achievement(i, stats, achievement):
                 user.achievements[i] = True
-                newly_unlocked.append(i)
+                # Add full achievement object with id
+                achievement_obj = {
+                    "id": i,
+                    "description": achievement["description"],
+                    "target": achievement["target"],
+                    "difficulty": achievement["difficulty"],
+                    "event": achievement["event"],
+                    "unlocked": True
+                }
+                newly_unlocked.append(achievement_obj)
                 print(f"🏆 User {user_id} unlocked achievement {i}: {achievement['description']}")
         
         # Save changes if any achievements were unlocked
