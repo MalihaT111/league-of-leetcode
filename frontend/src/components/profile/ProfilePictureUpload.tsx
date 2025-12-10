@@ -19,8 +19,14 @@ export default function ProfilePictureUpload({
 }: ProfilePictureUploadProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [localPictureUrl, setLocalPictureUrl] = useState<string | undefined>(currentPictureUrl);
   const uploadMutation = useUploadProfilePicture(userId);
   const resetRef = useRef<() => void>(null);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalPictureUrl(currentPictureUrl);
+  }, [currentPictureUrl]);
 
   // Clear success message after 3 seconds
   useEffect(() => {
@@ -51,7 +57,8 @@ export default function ProfilePictureUpload({
     setSuccess(null);
     
     try {
-      await uploadMutation.mutateAsync(file);
+      const result = await uploadMutation.mutateAsync(file);
+      setLocalPictureUrl(result.picture_url);
       setSuccess("Profile picture updated successfully!");
       resetRef.current?.();
     } catch (err) {
@@ -59,14 +66,13 @@ export default function ProfilePictureUpload({
     }
   };
 
-  // Debug logging
-  console.log('ProfilePictureUpload - currentPictureUrl:', currentPictureUrl);
+
 
   const avatarContent = (
     <Avatar
       size={40}
       radius="xl"
-      src={currentPictureUrl || undefined}
+      src={localPictureUrl || undefined}
       className={`${styles.headerAvatar} ${
         isOwnProfile ? styles.uploadableAvatar : ""
       }`}

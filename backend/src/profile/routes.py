@@ -75,5 +75,9 @@ async def get_profile_picture(filename: str):
     return FileResponse(
         file_path,
         media_type="image/jpeg",
-        headers={"Cache-Control": "public, max-age=3600"}  # Cache for 1 hour
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
     )

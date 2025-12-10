@@ -33,20 +33,28 @@ export const useUploadProfilePicture = (userId?: number) => {
       
       return res.json();
     },
-    onSuccess: () => {
-      // Add a small delay to ensure database update completes
-      setTimeout(() => {
-        // Invalidate all profile queries
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-        
-        // If we have a specific userId, also invalidate that specific query
-        if (userId) {
-          queryClient.invalidateQueries({ queryKey: ["profile", userId] });
-        }
-        
-        // Force a refetch by removing the query from cache
-        queryClient.removeQueries({ queryKey: ["profile"] });
-      }, 500); // 500ms delay
+    onSuccess: (data) => {
+      // Immediately update the cache with the new profile picture URL
+      if (userId) {
+        queryClient.setQueryData(["profile", userId], (oldData: any) => {
+          if (oldData) {
+            return {
+              ...oldData,
+              user: {
+                ...oldData.user,
+                profile_picture_url: data.picture_url
+              }
+            };
+          }
+          return oldData;
+        });
+      }
+      
+      // Also invalidate to ensure fresh data on next fetch
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["profile", userId] });
+      }
     },
   });
 };
