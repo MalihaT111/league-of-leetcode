@@ -29,6 +29,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     difficulty = Column(MutableList.as_mutable(JSON), default=lambda: [1, 2, 3], nullable=False)
     topics = Column(MutableList.as_mutable(JSON), default=lambda: [i for i in range(0, 71)], nullable=False)
     winstreak = Column(Integer, default=0, nullable=False)  # Win streak counter
+    achievements = Column(MutableList.as_mutable(JSON), default=lambda: [False for _ in range(8)], nullable=False)
     
     # FastAPI-users required fields (need to be added to your database)
     is_active = Column(Boolean, default=True, nullable=False)
