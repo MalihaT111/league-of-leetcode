@@ -9,6 +9,7 @@ import { Settings } from "@/lib/api/queries/settings";
 
 interface SettingsContainerProps {
   userId: number;
+  user?: any;
   validation: ValidationResult;
   settingsHook: {
     settings: Settings | null;
@@ -26,6 +27,7 @@ interface SettingsContainerProps {
 
 export default function SettingsContainer({
   userId,
+  user,
   validation,
   settingsHook,
   topicNames,
@@ -40,6 +42,7 @@ export default function SettingsContainer({
       >
         <SettingsToggles
           userId={userId}
+          user={user}
           validation={validation}
           settingsHook={settingsHook}
         />

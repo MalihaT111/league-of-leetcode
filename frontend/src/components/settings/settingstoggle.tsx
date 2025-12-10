@@ -9,6 +9,7 @@ import { Settings } from "@/lib/api/queries/settings";
 interface SettingsTogglesProps {
   userId?: number;
   validation?: ValidationResult;
+  user?: any;
   settingsHook: {
     settings: Settings | null;
     loading: boolean;
@@ -20,7 +21,9 @@ interface SettingsTogglesProps {
 }
 
 export default function SettingsToggles({
+  userId,
   validation,
+  user,
   settingsHook,
 }: SettingsTogglesProps) {
   const { settings, loading, error, toggleRepeat, toggleDifficulty, isDifficultyOn } =
@@ -75,7 +78,11 @@ export default function SettingsToggles({
       }}
     >
       <Stack gap="lg">
-        <ProfileHeader username={settings.leetcode_username} />
+        <ProfileHeader 
+          username={settings.leetcode_username} 
+          userId={userId || 0}
+          profilePictureUrl={user?.profile_picture_url}
+        />
 
         {/* Status Badge */}
         {validation && (

@@ -338,6 +338,7 @@ async def cancel_match_request(db: AsyncSession, request_id: int, user_id: int) 
 
 async def get_pending_requests(db: AsyncSession, user_id: int) -> dict:
     """Get all pending match requests for a user (sent and received)"""
+    from src.profile.file_service import get_profile_picture_url
     
     # Get sent requests
     sent_result = await db.execute(
@@ -377,9 +378,11 @@ async def get_pending_requests(db: AsyncSession, user_id: int) -> dict:
         "sent": [
             {
                 "request_id": req.request_id,
-                "receiver_id": user.id,
-                "receiver_username": user.leetcode_username or user.email,
-                "receiver_elo": user.user_elo,
+                "user_id": user.id,
+                "username": user.username,
+                "leetcode_username": user.leetcode_username or "",
+                "user_elo": user.user_elo,
+                "profile_picture_url": get_profile_picture_url(user.profile_picture_url),
                 "created_at": req.created_at.isoformat(),
                 "expires_at": req.expires_at.isoformat()
             }
@@ -388,9 +391,11 @@ async def get_pending_requests(db: AsyncSession, user_id: int) -> dict:
         "received": [
             {
                 "request_id": req.request_id,
-                "sender_id": user.id,
-                "sender_username": user.leetcode_username or user.email,
-                "sender_elo": user.user_elo,
+                "user_id": user.id,
+                "username": user.username,
+                "leetcode_username": user.leetcode_username or "",
+                "user_elo": user.user_elo,
+                "profile_picture_url": get_profile_picture_url(user.profile_picture_url),
                 "created_at": req.created_at.isoformat(),
                 "expires_at": req.expires_at.isoformat()
             }

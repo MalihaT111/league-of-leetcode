@@ -9,6 +9,7 @@ import { AuthService } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/lib/api/queries/settings";
 import { useTopicValidation } from "@/lib/hooks/useTopicValidation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import LoadingScreen from "@/components/all/LoadingScreen";
 import styles from "./Settings.module.css";
 
@@ -37,9 +38,8 @@ const TOPIC_NAMES = [
 ];
 
 export default function SettingsPage() {
-  const [userId, setUserId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { currentUser, loading } = useCurrentUser();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -49,35 +49,23 @@ export default function SettingsPage() {
   }, [router]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const user = await AuthService.getCurrentUser();
-        if (!user || !user.leetcode_username) {
-          router.push("/signin");
-        } else {
-          setUserId(user.id);
-        }
-      } catch {
-        router.push("/signin");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [router]);
+    if (!loading && (!currentUser || !currentUser.leetcode_username)) {
+      router.push("/signin");
+    }
+  }, [currentUser, loading, router]);
 
   const topicNames = useMemo(() => TOPIC_NAMES, []);
 
-  if (loading || !userId) {
+  if (loading || !currentUser) {
     return <LoadingScreen message="LOADING USER..." />;
   }
 
-  return <SettingsContent userId={userId} topicNames={topicNames} />;
+  return <SettingsContent user={currentUser} topicNames={topicNames} />;
 }
 
-function SettingsContent({ userId, topicNames }: { userId: number; topicNames: string[] }) {
+function SettingsContent({ user, topicNames }: { user: any; topicNames: string[] }) {
   const [search, setSearch] = useState("");
-  const settingsHook = useSettings(userId);
+  const settingsHook = useSettings(user.id);
   const { settings, toggleRepeat, toggleDifficulty, isDifficultyOn, toggleTopic, isTopicOn, updateSettings } = settingsHook;
 
   const validation = useTopicValidation(
@@ -132,7 +120,11 @@ function SettingsContent({ userId, topicNames }: { userId: number; topicNames: s
             </Title>
 
             <div style={{ marginBottom: 20 }}>
-              <ProfileHeader username={settings.leetcode_username} />
+              <ProfileHeader 
+                username={settings.leetcode_username} 
+                userId={user.id}
+                profilePictureUrl={user.profile_picture_url}
+              />
             </div>
 
             {[

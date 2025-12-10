@@ -190,6 +190,7 @@ export default function FriendsPage() {
                       username={friend.username}
                       leetcodeUsername={friend.leetcode_username}
                       elo={friend.user_elo}
+                      profilePictureUrl={friend.profile_picture_url}
                       actions={
                         <>
                           {hasPendingSent ? (
@@ -244,11 +245,11 @@ export default function FriendsPage() {
               <Stack gap="md">
                 {matchRequests.received.map((request: any) => (
                   <FriendCard
-                    key={friend.user_id}
-                    username={friend.username}
-                    leetcodeUsername={friend.leetcode_username}
-                    elo={friend.user_elo}
-                    profilePictureUrl={friend.profile_picture_url}
+                    key={request.user_id}
+                    username={request.username}
+                    leetcodeUsername={request.leetcode_username}
+                    elo={request.user_elo}
+                    profilePictureUrl={request.profile_picture_url}
                     actions={
                       <>
                         <ActionButton
