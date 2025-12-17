@@ -78,7 +78,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
                         "problem": problem.dict(),
                         "opponent": {
                             "username": opponent.leetcode_username or opponent.email,
-                            "elo": opponent.user_elo
+                            "elo": opponent.user_elo,
+                            "profile_picture_url": opponent.profile_picture_url
                         }
                     })
                     

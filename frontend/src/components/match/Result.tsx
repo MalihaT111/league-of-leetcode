@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Box, Text } from "@mantine/core";
+import { Flex, Box, Text, Avatar } from "@mantine/core";
 import { Crown } from "lucide-react";
 import styles from "./Result.module.css";
 
@@ -10,6 +10,7 @@ interface PlayerResultProps {
   isWinner?: boolean;
   onClick?: () => void;
   active?: boolean;
+  profilePictureUrl?: string | null;
 }
 
 export function PlayerResult({
@@ -18,6 +19,7 @@ export function PlayerResult({
   isWinner,
   onClick,
   active,
+  profilePictureUrl,
 }: PlayerResultProps) {
   const isLarge = !!active;
 
@@ -46,7 +48,14 @@ export function PlayerResult({
     <div className={wrapperClasses} onClick={onClick}>
       <Flex align="center" gap="md" className={innerClasses}>
         {isWinner && <Crown size={24} className={styles.crownIcon} />}
-        <Box className={avatarClasses}>{tag}</Box>
+        <Avatar
+          size={isLarge ? 60 : 48}
+          radius={8}
+          src={profilePictureUrl || undefined}
+          className={avatarClasses}
+        >
+          {tag}
+        </Avatar>
         <Text fw={600} size={isLarge ? "xl" : "md"} c="rgba(220, 220, 255, 1)">
           {name}
         </Text>

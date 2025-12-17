@@ -27,12 +27,15 @@ class WebSocketManager:
         # Store active connections by user_id
         self.active_connections: Dict[int, WebSocket] = {}
         # Store users waiting in queue
-        self.queue: Dict[int, dict] = {}  # user_id -> {elo, websocket}
+        self.queue: Dict[int, dict] = {}  # user_id -> {elo, websocket, join_time}
         # Store match problems by match_id
         self.match_problems: Dict[int, dict] = {}
         # Store match timers by match_id
         self.match_timers: Dict[int, dict] = {}  # match_id -> {start_time, players, status}
         self.matchmaking_manager = MatchmakingManager()
+        # Start queue status update task
+        self._queue_update_task = None
+        self._start_queue_updates()
 
     async def get_user_games_played(self, user_id: int, db: AsyncSession) -> int:
         """Get the total number of completed games for a user."""
@@ -76,10 +79,12 @@ class WebSocketManager:
         """Add user to matchmaking queue"""
         print(f"🚀 User {user_id} joining queue with ELO {user_elo}")
         
-        # Add to queue
+        # Add to queue with timestamp for progressive matching
+        import time
         self.queue[user_id] = {
             "elo": user_elo,
-            "websocket": self.active_connections.get(user_id)
+            "websocket": self.active_connections.get(user_id),
+            "join_time": time.time()
         }
 
         # Send queue joined confirmation
@@ -101,24 +106,54 @@ class WebSocketManager:
             })
             print(f"🚪 User {user_id} left queue")
 
+    def get_elo_range_for_wait_time(self, wait_time_seconds: float) -> int:
+        """Calculate ELO range based on how long user has been waiting"""
+        if wait_time_seconds < 30:  # First 30 seconds
+            return 100
+        elif wait_time_seconds < 60:  # 30-60 seconds
+            return 150
+        elif wait_time_seconds < 120:  # 1-2 minutes
+            return 200
+        elif wait_time_seconds < 300:  # 2-5 minutes
+            return 300
+        elif wait_time_seconds < 600:  # 5-10 minutes
+            return 500
+        else:  # 10+ minutes - very generous matching
+            return 1000
+
     async def try_match_players(self, db: AsyncSession):
-        """Try to match players in queue"""
+        """Try to match players in queue with progressive ELO expansion"""
         if len(self.queue) < 2:
             return
 
-        # Get two players from queue (simple FIFO for now)
+        import time
+        current_time = time.time()
         queue_items = list(self.queue.items())
         
+        # Try to match players with progressive ELO ranges
         for i in range(len(queue_items)):
             for j in range(i + 1, len(queue_items)):
                 user1_id, user1_data = queue_items[i]
                 user2_id, user2_data = queue_items[j]
                 
-                # Check ELO compatibility (±100)
+                # Calculate wait times for both users
+                user1_wait_time = current_time - user1_data["join_time"]
+                user2_wait_time = current_time - user2_data["join_time"]
+                
+                # Use the maximum wait time to determine ELO range (more generous matching)
+                max_wait_time = max(user1_wait_time, user2_wait_time)
+                elo_range = self.get_elo_range_for_wait_time(max_wait_time)
+                
+                # Check ELO compatibility with progressive range
                 elo_diff = abs(user1_data["elo"] - user2_data["elo"])
-                if elo_diff <= 100:
+                if elo_diff <= elo_range:
+                    print(f"🎯 Matching users {user1_id} (ELO: {user1_data['elo']}) and {user2_id} (ELO: {user2_data['elo']}) with ELO diff {elo_diff} (range: ±{elo_range}, max wait: {max_wait_time:.1f}s)")
                     await self.create_match(user1_id, user2_id, db)
                     return
+                else:
+                    # Log why match was rejected for debugging
+                    if elo_diff > 100:  # Only log if it would have been rejected under old system
+                        print(f"⏳ Users {user1_id} (ELO: {user1_data['elo']}) and {user2_id} (ELO: {user2_data['elo']}) - ELO diff {elo_diff} > range ±{elo_range} (wait: {max_wait_time:.1f}s)")
 
     async def create_match(self, user1_id: int, user2_id: int, db: AsyncSession):
         """Create a match between two users"""
@@ -142,9 +177,29 @@ class WebSocketManager:
             match_record = await create_match_record(db, user1, user2)
             if not match_record:
                 print(f"❌ Failed to create match record between {user1.email} and {user2.email}")
-                # Re-add users to queue
-                self.queue[user1_id] = {"elo": user1.user_elo, "websocket": self.active_connections.get(user1_id)}
-                self.queue[user2_id] = {"elo": user2.user_elo, "websocket": self.active_connections.get(user2_id)}
+                # Re-add users to queue with original join times
+                import time
+                current_time = time.time()
+                self.queue[user1_id] = {
+                    "elo": user1.user_elo, 
+                    "websocket": self.active_connections.get(user1_id),
+                    "join_time": current_time - 5  # Give them a small head start
+                }
+                self.queue[user2_id] = {
+                    "elo": user2.user_elo, 
+                    "websocket": self.active_connections.get(user2_id),
+                    "join_time": current_time - 5  # Give them a small head start
+                }
+                
+                # Notify users about the retry
+                await self.send_to_user(user1_id, {
+                    "type": "match_retry",
+                    "message": "Match creation failed, retrying with broader criteria..."
+                })
+                await self.send_to_user(user2_id, {
+                    "type": "match_retry", 
+                    "message": "Match creation failed, retrying with broader criteria..."
+                })
                 return
             
             match = match_record["match"]
@@ -194,8 +249,28 @@ class WebSocketManager:
         except Exception as e:
             print(f"❌ Error creating match: {e}")
             # Re-add users to queue if match creation failed
-            self.queue[user1_id] = {"elo": user1.user_elo, "websocket": self.active_connections.get(user1_id)}
-            self.queue[user2_id] = {"elo": user2.user_elo, "websocket": self.active_connections.get(user2_id)}
+            import time
+            current_time = time.time()
+            self.queue[user1_id] = {
+                "elo": user1.user_elo, 
+                "websocket": self.active_connections.get(user1_id),
+                "join_time": current_time - 10  # Give them more head start after error
+            }
+            self.queue[user2_id] = {
+                "elo": user2.user_elo, 
+                "websocket": self.active_connections.get(user2_id),
+                "join_time": current_time - 10  # Give them more head start after error
+            }
+            
+            # Notify users about the error
+            await self.send_to_user(user1_id, {
+                "type": "match_error",
+                "message": "Match creation encountered an error, continuing search..."
+            })
+            await self.send_to_user(user2_id, {
+                "type": "match_error",
+                "message": "Match creation encountered an error, continuing search..."
+            })
 
     async def submit_solution(self, match_id: int, user_id: int, db: AsyncSession, frontend_seconds: int = 0):
         """Handle solution submission with LeetCode validation"""
@@ -621,6 +696,65 @@ class WebSocketManager:
         """Stop the timer for a match"""
         if match_id in self.match_timers:
             self.match_timers[match_id]["status"] = "completed"
+
+    def _start_queue_updates(self):
+        """Start the periodic queue status update and matching tasks"""
+        import asyncio
+        
+        async def queue_update_loop():
+            while True:
+                try:
+                    await asyncio.sleep(10)  # Update every 10 seconds
+                    await self._send_queue_updates()
+                except Exception as e:
+                    print(f"❌ Queue update error: {e}")
+        
+        async def periodic_matching_loop():
+            """Periodically try to match players to handle progressive ELO expansion"""
+            while True:
+                try:
+                    await asyncio.sleep(5)  # Try matching every 5 seconds
+                    if len(self.queue) >= 2:
+                        from ..database.database import AsyncSessionLocal
+                        async with AsyncSessionLocal() as db:
+                            await self.try_match_players(db)
+                except Exception as e:
+                    print(f"❌ Periodic matching error: {e}")
+        
+        # Start both tasks
+        asyncio.create_task(queue_update_loop())
+        asyncio.create_task(periodic_matching_loop())
+
+    async def _send_queue_updates(self):
+        """Send queue status updates to all users in queue"""
+        if not self.queue:
+            return
+            
+        import time
+        current_time = time.time()
+        queue_size = len(self.queue)
+        
+        for user_id, user_data in self.queue.items():
+            wait_time = current_time - user_data["join_time"]
+            current_elo_range = self.get_elo_range_for_wait_time(wait_time)
+            
+            # Count potential matches within current ELO range
+            user_elo = user_data["elo"]
+            potential_matches = 0
+            for other_id, other_data in self.queue.items():
+                if other_id != user_id:
+                    elo_diff = abs(user_elo - other_data["elo"])
+                    if elo_diff <= current_elo_range:
+                        potential_matches += 1
+            
+            await self.send_to_user(user_id, {
+                "type": "queue_status",
+                "queue_size": queue_size,
+                "wait_time": int(wait_time),
+                "elo_range": current_elo_range,
+                "potential_matches": potential_matches,
+                "message": f"Searching... ({int(wait_time)}s, ±{current_elo_range} ELO, {potential_matches} potential matches)"
+            })
 
 
     

@@ -34,6 +34,11 @@ interface WebSocketMessage {
   formatted_time?: string;
   start_timestamp?: number;
   achievements_unlocked?: Achievement[];
+  // Queue status fields
+  queue_size?: number;
+  wait_time?: number;
+  elo_range?: number;
+  potential_matches?: number;
 }
 
 export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?: () => void) => {
@@ -49,6 +54,15 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
   const [matchSeconds, setMatchSeconds] = useState<number>(0);
   const [formattedTime, setFormattedTime] = useState<string>("00:00");
   const [startTimestamp, setStartTimestamp] = useState<number | null>(null);
+  
+  // Queue status states
+  const [queueStatus, setQueueStatus] = useState<{
+    queueSize: number;
+    waitTime: number;
+    eloRange: number;
+    potentialMatches: number;
+    message: string;
+  } | null>(null);
   
   const wsRef = useRef<WebSocket | null>(null);
   const router = useRouter();
@@ -95,10 +109,44 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
         switch (message.type) {
           case 'queue_joined':
             setIsInQueue(true);
+            setQueueStatus(null); // Reset queue status
             break;
 
           case 'queue_left':
             setIsInQueue(false);
+            setQueueStatus(null); // Clear queue status
+            break;
+
+          case 'queue_status':
+            if (message.queue_size !== undefined) {
+              setQueueStatus({
+                queueSize: message.queue_size,
+                waitTime: message.wait_time || 0,
+                eloRange: message.elo_range || 100,
+                potentialMatches: message.potential_matches || 0,
+                message: message.message || 'Searching...'
+              });
+            }
+            break;
+
+          case 'match_retry':
+            // Show notification about match retry
+            notifications.show({
+              title: 'Retrying Match',
+              message: message.message || 'Retrying with broader criteria...',
+              color: 'yellow',
+              autoClose: 3000,
+            });
+            break;
+
+          case 'match_error':
+            // Show notification about match error
+            notifications.show({
+              title: 'Match Error',
+              message: message.message || 'Match creation error, continuing search...',
+              color: 'red',
+              autoClose: 3000,
+            });
             break;
 
           case 'match_found':
@@ -293,6 +341,8 @@ export const useMatchmakingWebSocket = (userId: number | null, onMatchCompleted?
     timerPhase,
     countdown,
     matchSeconds,
-    formattedTime
+    formattedTime,
+    // Queue status
+    queueStatus
   };
 };

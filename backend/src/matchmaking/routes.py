@@ -71,6 +71,7 @@ async def join_queue(user_id: int, db: AsyncSession = Depends(get_db)):
             match_id=match["match_id"],
             opponent=match["opponent"],
             opponent_elo=match["opponent_elo"],
+            opponent_profile_picture_url=match.get("opponent_profile_picture_url"),
             problem=problem.dict() if problem else {}
         )
         return QueueResponse(status="matched", match=match_response)
@@ -120,6 +121,7 @@ async def get_match_status(user_id: int, db: AsyncSession = Depends(get_db)):
                 match_id=match.match_id,
                 opponent="",  # Not needed for completed status
                 opponent_elo=0,
+                opponent_profile_picture_url=None,
                 problem=manager.problem.dict() if manager.problem else Problem(),
                 result="won" if user_won else "lost"
             ))
@@ -136,6 +138,7 @@ async def get_match_status(user_id: int, db: AsyncSession = Depends(get_db)):
                     match_id=match.match_id,
                     opponent=opponent.email,
                     opponent_elo=opponent.user_elo,
+                    opponent_profile_picture_url=opponent.profile_picture_url,
                     problem=manager.problem.dict() if manager.problem else {}
                 )
             )

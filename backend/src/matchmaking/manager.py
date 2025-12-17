@@ -65,6 +65,7 @@ class MatchmakingManager:
                 "match_id": match.match_id,
                 "opponent": opp.email,  # Using email which maps to username
                 "opponent_elo": opp.user_elo,
+                "opponent_profile_picture_url": opp.profile_picture_url,
                 "problem": problem  # Return problem directly for first player
             }
 

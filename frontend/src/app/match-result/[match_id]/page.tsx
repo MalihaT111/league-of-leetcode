@@ -252,12 +252,14 @@ export default function MatchResultPage() {
               isWinner
               active={selectedPlayer === "winner"}
               onClick={() => setSelectedPlayer("winner")}
+              profilePictureUrl={data.winner?.profile_picture_url}
             />
             <PlayerResult
               name={result.loser.username}
               tag="L"
               active={selectedPlayer === "loser"}
               onClick={() => setSelectedPlayer("loser")}
+              profilePictureUrl={data.loser?.profile_picture_url}
             />
           </div>
 

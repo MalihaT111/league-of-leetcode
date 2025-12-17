@@ -18,6 +18,7 @@ interface MatchFoundProps {
     match_id: number;
     opponent: string;
     opponent_elo: number;
+    opponent_profile_picture_url?: string | null;
     problem: {
       difficulty: string;
       title: string;
@@ -190,6 +191,7 @@ export default function MatchFound({
           <ProfileBox
             username={user.leetcode_username || "User 1"}
             rating={user.user_elo}
+            profilePictureUrl={user.profile_picture_url}
           />
         </div>
 
@@ -198,7 +200,11 @@ export default function MatchFound({
 
         {/* RIGHT PLAYER */}
         <div className={`${styles.matchFoundCard} ${styles.matchFoundCardRight}`}>
-          <ProfileBox username={match.opponent} rating={match.opponent_elo} />
+          <ProfileBox 
+            username={match.opponent} 
+            rating={match.opponent_elo}
+            profilePictureUrl={match.opponent_profile_picture_url}
+          />
         </div>
       </Flex>
 

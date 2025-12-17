@@ -38,9 +38,13 @@ class ResultsService:
         )
         loser = loser_result.scalar_one_or_none()
         
-        # Calculate ELO before the match
-        winner_elo_before = match_history.winner_elo - match_history.elo_change
-        loser_elo_before = match_history.loser_elo + abs(match_history.elo_change)
+        # Use the new separate ELO change fields if available, fallback to old field
+        winner_elo_change = match_history.winner_elo_change if match_history.winner_elo_change is not None else match_history.elo_change
+        loser_elo_change = match_history.loser_elo_change if match_history.loser_elo_change is not None else -match_history.elo_change
+        
+        # Calculate ELO before the match using the correct individual changes
+        winner_elo_before = match_history.winner_elo - winner_elo_change
+        loser_elo_before = match_history.loser_elo - loser_elo_change  # loser_elo_change is already negative
         
         # Format problem title
         problem_title = match_history.leetcode_problem.replace('-', ' ').title()
@@ -50,9 +54,10 @@ class ResultsService:
             "winner": {
                 "id": match_history.winner_id,
                 "username": winner.leetcode_username if winner else f"Player{match_history.winner_id}",
+                "profile_picture_url": winner.profile_picture_url if winner else None,
                 "elo_before": winner_elo_before,
                 "elo_after": match_history.winner_elo,
-                "elo_change": match_history.elo_change,
+                "elo_change": winner_elo_change,
                 "runtime": match_history.winner_runtime,
                 "memory": match_history.winner_memory,
                 "code": match_history.winner_code
@@ -60,9 +65,10 @@ class ResultsService:
             "loser": {
                 "id": match_history.loser_id,
                 "username": loser.leetcode_username if loser else f"Player{match_history.loser_id}",
+                "profile_picture_url": loser.profile_picture_url if loser else None,
                 "elo_before": loser_elo_before,
                 "elo_after": match_history.loser_elo,
-                "elo_change": -abs(match_history.elo_change),
+                "elo_change": loser_elo_change,
                 "runtime": match_history.loser_runtime,
                 "memory": match_history.loser_memory,
                 "code": match_history.loser_code
@@ -167,7 +173,7 @@ class ResultsService:
                 "won": won,
                 "opponent_id": opponent_id,
                 "opponent_username": opponent.leetcode_username if opponent else f"Player{opponent_id}",
-                "elo_change": match.elo_change if won else -match.elo_change,
+                "elo_change": (match.winner_elo_change if match.winner_elo_change is not None else match.elo_change) if won else (match.loser_elo_change if match.loser_elo_change is not None else -match.elo_change),
                 "final_elo": match.winner_elo if won else match.loser_elo,
                 "problem": match.leetcode_problem,
                 "match_duration": match.match_seconds,

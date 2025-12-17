@@ -11,12 +11,21 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
 });
 
+interface QueueStatus {
+  queueSize: number;
+  waitTime: number;
+  eloRange: number;
+  potentialMatches: number;
+  message: string;
+}
+
 interface MatchmakingProps {
   user: User;
   seconds: number;
   handleLeaveQueue: () => Promise<void>;
   isLeaving?: boolean;
   connectionStatus?: string;
+  queueStatus?: QueueStatus | null;
 }
 
 export default function Matchmaking({
@@ -25,6 +34,7 @@ export default function Matchmaking({
   handleLeaveQueue,
   isLeaving = false,
   connectionStatus,
+  queueStatus,
 }: MatchmakingProps) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -47,9 +57,24 @@ export default function Matchmaking({
         MATCHMAKING
       </Title>
 
-      <Text className={styles.searchingText} ta="center" mt={-10}>
-        finding a worthy opponent...
-      </Text>
+      <Stack align="center" gap="xs" mt={-10}>
+        <Text className={styles.searchingText} ta="center">
+          {queueStatus?.message || "finding a worthy opponent..."}
+        </Text>
+        
+        {queueStatus && (
+          <Stack align="center" gap={4}>
+            <Text size="sm" c="rgba(220, 220, 255, 0.8)" ta="center">
+              {queueStatus.queueSize} players in queue • ±{queueStatus.eloRange} ELO range
+            </Text>
+            {queueStatus.potentialMatches > 0 && (
+              <Text size="xs" c="rgba(220, 220, 255, 0.6)" ta="center">
+                {queueStatus.potentialMatches} potential match{queueStatus.potentialMatches !== 1 ? 'es' : ''} found
+              </Text>
+            )}
+          </Stack>
+        )}
+      </Stack>
 
       <Flex align="center" justify="center" gap="5rem" mt="lg">
         {/* LEFT PLAYER */}

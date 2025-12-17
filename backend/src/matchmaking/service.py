@@ -129,12 +129,33 @@ async def create_match_record(db: AsyncSession, user: User, opponent: User):
         excluded_problems.update(opponent_completed)
         print(f"🔄 Opponent {opponent.email} has repeat OFF - excluding {len(opponent_completed)} problems")
 
-    # If no overlap, use fallback defaults to ensure matches can still be created
+    # Implement progressive fallback matching
+    fallback_used = False
     if not shared_topics and not shared_difficulty:
-        print(f"⚠️ No overlap between {user.email} and {opponent.email}, using fallback settings")
-        # Use medium difficulty and popular topics as fallback
-        shared_difficulty = ["2"]  # Medium difficulty
-        shared_topics = ["0", "1", "2"]  # Array, String, Hash Table (most common)
+        print(f"⚠️ No overlap between {user.email} and {opponent.email}, trying fallback strategies")
+        fallback_used = True
+        
+        # Strategy 1: Try individual preferences first
+        user_topics = user.topics or []
+        user_difficulty = user.difficulty or []
+        opponent_topics = opponent.topics or []
+        opponent_difficulty = opponent.difficulty or []
+        
+        # Combine all topics and difficulties from both users
+        combined_topics = list(set(user_topics + opponent_topics))
+        combined_difficulty = list(set(user_difficulty + opponent_difficulty))
+        
+        if combined_topics or combined_difficulty:
+            shared_topics = combined_topics[:5]  # Limit to 5 topics to avoid too broad search
+            shared_difficulty = combined_difficulty
+            print(f"📋 Fallback Strategy 1: Using combined preferences - topics: {shared_topics}, difficulty: {shared_difficulty}")
+        else:
+            # Strategy 2: Use popular defaults
+            shared_difficulty = ["2"]  # Medium difficulty
+            shared_topics = ["0", "1", "2"]  # Array, String, Hash Table (most common)
+            print(f"📋 Fallback Strategy 2: Using default popular settings - topics: {shared_topics}, difficulty: {shared_difficulty}")
+    else:
+        print(f"✅ Found overlap - topics: {shared_topics}, difficulty: {shared_difficulty}")
     
     # Convert topic indices to topic slugs
     topic_slugs = []
@@ -157,16 +178,46 @@ async def create_match_record(db: AsyncSession, user: User, opponent: User):
         except (ValueError, TypeError):
             continue
     
-    problem = await LeetCodeService.get_random_problem(
-        topics=topic_slugs or None,
-        difficulty=difficulty_strings or None,
-        excluded_slugs=excluded_problems if excluded_problems else None
-    )
+    # Try to get a problem with progressive fallback
+    problem = None
+    attempts = 0
+    max_attempts = 3
+    
+    while not problem and attempts < max_attempts:
+        attempts += 1
+        
+        try:
+            problem = await LeetCodeService.get_random_problem(
+                topics=topic_slugs or None,
+                difficulty=difficulty_strings or None,
+                excluded_slugs=excluded_problems if excluded_problems else None
+            )
+            
+            if problem and not (isinstance(problem, dict) and "error" in problem):
+                break
+                
+        except Exception as e:
+            print(f"❌ Attempt {attempts} failed to fetch problem: {e}")
+        
+        # If first attempt failed and we used specific preferences, try with broader settings
+        if attempts == 1 and (topic_slugs or difficulty_strings):
+            print(f"🔄 Attempt {attempts + 1}: Trying with broader settings")
+            # Remove topic restrictions but keep difficulty
+            topic_slugs = None
+        elif attempts == 2:
+            print(f"🔄 Attempt {attempts + 1}: Trying with no restrictions")
+            # Remove all restrictions
+            topic_slugs = None
+            difficulty_strings = None
+            excluded_problems = set()  # Also ignore exclusions as last resort
 
     if not problem or (isinstance(problem, dict) and "error" in problem):
         error_msg = problem.get("error", "Unknown error") if isinstance(problem, dict) else "Failed to fetch problem"
-        print(f"⚠️ Failed to fetch compatible problem for {user.email} & {opponent.email}: {error_msg}")
+        print(f"❌ Failed to fetch any compatible problem after {max_attempts} attempts for {user.email} & {opponent.email}: {error_msg}")
         return None
+    
+    if attempts > 1:
+        print(f"✅ Successfully fetched problem on attempt {attempts} for {user.email} & {opponent.email}")
 
     match = MatchHistory(
         winner_id=user.id,  # Temporary - will be updated when match completes

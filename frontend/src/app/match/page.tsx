@@ -21,8 +21,11 @@ interface Problem {
 
 interface MatchData {
   match_id: number;
-  opponent: string;
-  opponent_elo: number;
+  opponent: {
+    username: string;
+    elo: number;
+    profile_picture_url?: string | null;
+  };
   problem: Problem
 }
 
@@ -51,7 +54,8 @@ export default function MatchmakingPage() {
     timerPhase,
     countdown,
     matchSeconds,
-    formattedTime
+    formattedTime,
+    queueStatus
   } = useMatchmakingWebSocket(user?.id || null, () => {
     setIsRedirecting(true);
   });
@@ -200,6 +204,7 @@ export default function MatchmakingPage() {
           match_id: matchData.match_id,
           opponent: matchData.opponent.username,
           opponent_elo: matchData.opponent.elo,
+          opponent_profile_picture_url: matchData.opponent.profile_picture_url,
           problem: {
             title: matchData.problem.title,
             titleSlug: matchData.problem.slug,
@@ -232,6 +237,7 @@ export default function MatchmakingPage() {
         handleLeaveQueue={handleLeaveQueue}
         isLeaving={false}
         connectionStatus={isConnected ? 'Connected' : 'Connecting...'}
+        queueStatus={queueStatus}
       />
     );
   }
