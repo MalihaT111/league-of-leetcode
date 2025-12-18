@@ -21,14 +21,21 @@ A competitive LeetCode matchmaking platform where users compete head-to-head on 
 - **FastAPI** - Modern Python web framework
 - **SQLAlchemy** - ORM with async support
 - **MySQL** - Database
+- **Redis** - Matchmaking queue and caching
 - **WebSockets** - Real-time matchmaking
 - **LeetCode GraphQL API** - Problem fetching and stats
+- **Bcrypt/Argon2** - Password hashing
+- **JWT** - Authentication tokens
+- **Playwright** - Web scraping for LeetCode integration
 
 ### Frontend
-- **Next.js 14** - React framework with App Router
+- **Next.js 15** - React framework with App Router and Turbopack
+- **React 19** - UI library
 - **TypeScript** - Type safety
 - **Mantine UI** - Component library
-- **React Query** - Data fetching and caching
+- **TanStack Query** - Server state management and data fetching
+- **Three.js + React Three Fiber** - 3D graphics and animations
+- **pnpm** - Package manager
 
 ## Project Structure
 
@@ -62,10 +69,11 @@ leagueofleetcode/
 ## Getting Started
 
 ### Prerequisites
-- Python 3.13+
+- Python 3.12+
 - Node.js 18+
 - MySQL 8.0+
-- pnpm (or npm)
+- Redis 7.0+
+- pnpm (recommended) or npm
 
 ### Backend Setup
 
@@ -80,11 +88,12 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials
+# Create .env file with:
+# DATABASE_URL=mysql+aiomysql://user:password@localhost/league_of_leetcode
+# SECRET_KEY=your-secret-key
 
-# Run migrations (if applicable)
-# python manage.py migrate
+# Start Redis (required for matchmaking)
+redis-server
 
 # Start the server
 uvicorn src.main:app --reload
@@ -100,9 +109,9 @@ cd frontend
 # Install dependencies
 pnpm install
 
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local if needed
+# Set up environment variables (optional)
+# Create .env.local if you need to override API URL:
+# NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 
 # Start development server
 pnpm dev
@@ -112,10 +121,9 @@ Frontend runs on `http://localhost:3000`
 
 ### Using Justfile (Recommended)
 
-```bash
-# Install all dependencies
-just install
+The project includes a `justfile` for easy task management:
 
+```bash
 # Start both backend and frontend
 just dev
 
@@ -125,6 +133,8 @@ just dev-backend
 # Start frontend only
 just dev-frontend
 ```
+
+**Note:** Redis must be running separately before starting the backend.
 
 ## Key Features Documentation
 
@@ -140,10 +150,12 @@ just dev-frontend
 - Graceful error when all problems are completed
 
 ### Matchmaking System
-- WebSocket-based real-time matchmaking
+- Redis-based queue with ELO-sorted matching (±100 ELO range)
+- WebSocket notifications for real-time updates
 - Matches users with similar ELO ratings
 - Considers shared topics and difficulties
 - Excludes completed problems if repeat is disabled
+- Automatic queue management and cleanup
 
 ### Friends System
 - Send/accept/reject friend requests
@@ -181,14 +193,16 @@ just dev-frontend
 
 ### Backend (.env)
 ```env
-DATABASE_URL=mysql+aiomysql://user:password@localhost/leetcode_db
-SECRET_KEY=your-secret-key
+DATABASE_URL=mysql+aiomysql://user:password@localhost/league_of_leetcode
+SECRET_KEY=your-secret-key-here
 ```
 
 ### Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
+
+**Note:** Frontend will default to `http://localhost:8000` if not specified.
 
 ## Development Notes
 
@@ -203,9 +217,11 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - Topic is invalid only if ALL selected difficulties are disallowed
 
 ### Database Schema
-- `users` - User accounts and settings
-- `match_history` - Completed matches
+- `users` - User accounts, settings, and ELO ratings
+- `match_history` - Completed matches with results
 - `friends` - Friend relationships and requests
+- `match_requests` - Friend-to-friend match challenges
+- Redis queue - Active matchmaking queue (ephemeral)
 
 ## Testing
 
@@ -214,27 +230,30 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 cd backend
 pytest
 
-# Frontend tests
-cd frontend
-pnpm test
+# Manual API testing
+./backend/test_friends_api.sh  # Bash script
+python backend/test_friends_api.py  # Python script
 ```
 
 ## Troubleshooting
 
 ### Backend won't start
-- Check MySQL is running
+- Check MySQL is running: `mysql -u root -p`
+- **Check Redis is running**: `redis-cli ping` (should return "PONG")
 - Verify database credentials in .env
-- Ensure all dependencies are installed
+- Ensure all dependencies are installed: `pip install -r requirements.txt`
 
 ### Frontend won't connect to backend
 - Verify backend is running on port 8000
 - Check CORS settings in backend/src/main.py
-- Verify API URL in frontend .env.local
+- Verify API URL in frontend .env.local (or defaults to localhost:8000)
 
 ### Matchmaking not working
+- **Ensure Redis is running** - matchmaking requires Redis
 - Check WebSocket connection in browser console
-- Verify user settings are valid
+- Verify user settings are valid (topics and difficulties)
 - Check backend logs for errors
+- Test Redis connection: `redis-cli zscore matchmaking_queue <user_id>`
 
 ## Contributing
 

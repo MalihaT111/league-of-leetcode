@@ -1,7 +1,7 @@
 # src/matchmaking/routes.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, and_
 from ..database.database import get_db
 from ..database.models import User, MatchHistory
 from ..matchmaking.manager import MatchmakingManager
